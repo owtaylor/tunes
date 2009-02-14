@@ -1,0 +1,273 @@
+body {
+}
+
+#tunesDiv {
+    position: absolute;
+    margin-top: 4em;
+    margin-bottom: 4em;
+    margin-left: 0.5em;
+    margin-right: 0.5em;
+    left: 20em;
+    right: 0px;
+}
+
+#tuneTable {
+    width: 100%;
+    table-layout: fixed;
+}
+
+#tuneLevelCol {
+    width: 2em;
+}
+
+#tuneRefsCol {
+    width: 15em;
+}
+
+#tuneNameCol {
+    width: auto;
+}
+
+#tuneSinceCol {
+    width: 5em;
+}
+
+#tuneFlagsCol {
+    width: 2.5em;
+}
+
+.tune-flags {
+    text-align: right;
+    padding-right: 0.5em;
+}
+
+:link {
+    color: #AA2222;
+    text-decoration: none;
+}
+
+:visited {
+    color: #884444;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+#tuneTable tr:hover {
+    background: #ffeecc;
+}
+
+#headerDiv {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    padding: 0.5em;
+    background: white;
+    height: 3em;
+    border-bottom: 1px solid gray;
+    z-index: 1;
+}
+
+#userDiv {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    height: 3em;
+    width: 19em;
+    padding: 0.5em;
+    border-right: 1px solid gray;
+}
+
+#filterDiv {
+    position: absolute;
+    top: 0px;
+    left: 20em;
+    right: 0px;
+    padding: 0.5em;
+}
+
+#sideDiv {
+    position: fixed;
+    top: 4em;
+    left: 0px;
+    bottom: 0px;
+    width: 19em;
+    padding: 0.5em;
+    border-right: 1px solid gray;
+    z-index: 1;
+}
+
+#infoDiv {
+    width: 100%;
+}
+
+#filterInput {
+    width: 40em;
+}
+
+.section-header {
+}
+
+.section-header th {
+    border: 1px solid gray;
+    background: #cceeaa;
+    text-align: left;
+}
+
+.rhythm-header th {
+    background: #aabb88;
+}
+
+.level-outer {
+    position: relative;
+    width: 1em;
+    height: 1em;
+    vertical-align: middle;
+}
+
+.level {
+    width: 1em;
+    height: 1em;
+    position: absolute;
+    top: -0.2em;
+    left: 0px;
+    text-align: center;
+}
+
+.symbol-maxlevel {
+    display: inline-block;
+    position: relative;
+    top: -0.1em;
+    color: #ffaa00;
+    width: 0px;
+}
+
+.symbol-level {
+    position: relative;
+    top: -0.1em;
+}
+
+.info-name {
+    font-size: 140%;
+    font-weight: bold;
+    margin-top: 0.25em;
+    margin-bottom: 0.25em;
+}
+
+.info-name .symbol-level, .info-name .symbol-maxlevel {
+    font-size: 120%;
+}
+
+.info-aka {
+    font-size: 120%;
+    font-weight: bold;
+    margin-top: 0.25em;
+    margin-bottom: 0.25em;
+}
+
+.info-details {
+    font-size: 120%;
+    font-weight: bold;
+    margin-top: 0.25em;
+    margin-bottom: 0.75em;
+    color: #444444;
+}
+
+.info-label {
+    font-weight: bold;
+}
+
+.info-refs, .info-since, .info-incipit {
+    margin-top: 0.25em;
+    margin-bottom: 0.25em;
+}
+
+.info-notes {
+    width: 100%;
+    margin-top: 0.5em;
+    padding-top: 0.5em;
+    border-top: 1px solid #cccccc;
+}
+
+.study-name {
+    font-weight: bold;
+}
+
+#rhythmDiv :link {
+    color: black;
+}
+
+#rhythmDiv .selected {
+    font-weight: bold;
+}
+
+.edit-item {
+    clear: both;
+    margin-bottom: 0.5em;
+}
+
+.edit-label {
+    font-weight: bold;
+}
+
+.edit-value {
+    width: 100%;
+}
+
+.edit-left-column {
+    display: block;
+    float: left;
+    font-weight: bold;
+    width: 9em;
+    margin-bottom: 0.5em;
+}
+
+.edit-right-column {
+    display: block;
+    float: right;
+    right: 0px;
+    width: 10em;
+    margin-bottom: 0.5em;
+}
+
+#levelSelectTable td {
+    padding-right: 1em;
+}
+
+.level-select {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    border: 1px solid black;
+    vertical-align: top;
+    overflow: hidden;
+    color: black;
+}
+
+.level-select:hover {
+    text-decoration: none;
+}
+
+.level-select-selected {
+    background: black;
+    color: white;
+}
+
+.level-select-contents {
+    position: relative;
+    top: -0.2em;
+}
+
+#editNotes  {
+   width: 100%;
+   height: 15em;
+}
+
+#tuneActions {
+    position: absolute;
+    right: 0.5em;
+    bottom: 0.5em;
+}

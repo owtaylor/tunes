@@ -1,0 +1,13 @@
+# Base URL for web site
+BASE_URL = "/tunes/"
+# User/group the CGI scripts run as
+WEB_USER = 'apache'
+WEB_GROUP = 'apache'
+# Location of the database
+TUNES_DB = '/var/lib/tunes/tunes.sqlite'
+# Location of the file holding the site auth secret; see make_secret script
+SITE_SECRET = '/var/lib/tunes/site.secret'
+# The admin (and only user)
+ADMIN_USERNAME = 'john.doe'
+# Password for the admin user; see crypt_password script
+ADMIN_PASSWORD = '<crypted value>'

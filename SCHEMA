@@ -1,0 +1,50 @@
+Tune:
+	id = arbitrary integer
+	name = my preferred name. 'The' stripped, tune type stripped if possessive
+	   (so, Kerry Reel, but Bill Harte's, not Bill Harte's Jig)
+	aka = other names, ; separated. These are only "correct" names... that is,
+	   names that are in common use for the tune or originally given by the
+	   author. Mislabelling or one-off don't count.
+	composer: person who wrote the tune, if known
+	key = A {,b,#} {,min,dor,mix}
+	rhythm = reel,hornpipe,jig,slide,slip jig
+	refs = free text. ngNNNN tsNNNN hn<type>NNNN
+	notes
+	level =
+	       1 given name can start and play through with authority
+	       2 given first measure or two can play rest with comfort
+                 (maybe taking a time or two through to remember)
+	       3 basically know with some holes. (Can't remember
+                 A=>B transition, or some phrases eluding.)
+                 reel, fast hornpipe - can play along getting most passages right
+                 jig, polka - can follow comfortably
+	       4 familiar tune
+                 reel, fast hornpipe - fake a bit in a big group
+                 jig, polka - play along after a time or two through
+	       5 no better than "rings a bell"
+        maxlevel = once had it at this level
+	since = [<]YEAR. When first learned at L3 or better
+	incipit = abc for the start of the tune
+	study = 0,1 - worth some practicing
+        structure = each letter is a 8 bar segment. Exception: For slides letters are 4-bar segments
+            Variant endings not distinguished
+            8 bar segments that a 2x4 not distinguished
+            Double length segments get two letters
+            Absent = AABB, Single Reel AB, Trip to Durrow AABCBC
+
+create table Tune (
+       id        INTEGER PRIMARY KEY,
+       name	 TEXT,
+       aka       TEXT,
+       composer  TEXT,
+       key       TEXT,
+       rhythm    TEXT,
+       structure TEXT,
+       refs      TEXT,
+       notes     TEXT,
+       incipit   TEXT,
+       level     INTEGER,
+       maxlevel  INTEGER,
+       study	 INTEGER,
+       since	 TEXT
+)

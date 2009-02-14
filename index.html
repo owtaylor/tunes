@@ -1,0 +1,105 @@
+<html>
+  <head>
+    <title>Owen Taylor's Tunebook</title>
+    <link rel="stylesheet" href="tunes.css" type="text/css"></link>
+    <script src="jquery.min.js" type="text/javascript"></script>
+    <script src="tunes.js" type="text/javascript"></script>
+    <script type="text/javascript">
+      $(function() { init(); });
+    </script>
+  </head>
+  <body>
+    <div id="headerDiv">
+      <div id="headerContents">
+	<div id="userDiv">
+	  <div id="loginDiv">
+	    <a href="login.html">Login</a>
+	  </div>
+	  <div id="logoutDiv" style="display:none;">
+	    Logged in as <span id="userSpan"></span><br/>
+	    <a href="javascript:void(0)" onclick="logout();">Logout</a>
+	  </div>
+	</div>
+	<div id="filterDiv">
+	  <input id="filterInput"/>
+	  <input type="checkbox" id="studyOnly">Study Tunes</input>
+	  <div id="rhythmDiv"></div>
+	</div>
+      </div>
+    </div>
+    <div id="sideDiv">
+      <div id="infoDiv">
+      </div>
+      <div id="editDiv" style="display:none">
+	<div class="edit-item"><span class="edit-label">Name</span><br/><input class="edit-value" id="editName"></input></div>
+	<div class="edit-item"><span class="edit-label">Aka</span><br/><input class="edit-value" id="editAka"></input></div>
+	<div class="edit-item">
+	  <span class="edit-left-column edit-label">Rhythm</span>
+	  <span class="edit-right-column">
+	    <select id="editRhythm" class="edit-value">
+	      <option value="hornpipe">Hornpipe</option>
+	      <option value="jig">Jig</option>
+	      <option value="slip jig">Slip Jig</option>
+	      <option value="mazurka" label>Mazurka</option>
+	      <option value="slide">Slide</option>
+	      <option value="reel" selected="1">Reel</option>
+	    </select>
+	  </span>
+	</div>
+	<div class="edit-item">
+	  <span class="edit-left-column edit-label">Key</span>
+	  <span class="edit-right-column">
+	    <input class="edit-value" id="editKey"></input>
+	  </span>
+	</div>
+	<div class="edit-item"><span class="edit-label">References</span><br/><input class="edit-value" id="editRefs"></input></div>
+	<div class="edit-item"><span class="edit-label">Starts</span><br/><input class="edit-value" id="editIncipit"></input></div>
+	<div class="edit-item">
+	  <span class="edit-left-column edit-label">Since</span>
+	  <span class="edit-right-column">
+	    <input class="edit-value" id="editSince"></input>
+	  </span>
+	</div>
+	<div class="edit-item">
+	  <div class="edit-left-column">
+	    <span class="edit-label">Level</span><br/>
+	    <a href="javascript:void(0);" class="level-select" onclick="selectLevel(1);"><span class="level-select-contents">&#x25cF;</span></a>
+	    <a href="javascript:void(0);" class="level-select" onclick="selectLevel(2);"><span class="level-select-contents">&#x25d1;</span></a>
+	    <a href="javascript:void(0);" class="level-select" onclick="selectLevel(3);"><span class="level-select-contents">&#x25d4;</span></a>
+	    <a href="javascript:void(0);" class="level-select" onclick="selectLevel(4);"><span class="level-select-contents">&#x25cb;</span></a>
+	    <a href="javascript:void(0);" class="level-select" onclick="selectLevel(5);"><span class="level-select-contents">&nbsp;</span></a>
+	  </div>
+	  <div class="edit-right-column">
+	    <span class="edit-label">Max Level</span><br/>
+	    <a href="javascript:void(0);" class="level-select" onclick="selectMaxLevel(1);"><span class="level-select-contents">&#x25cF;</span></a>
+	    <a href="javascript:void(0);" class="level-select" onclick="selectMaxLevel(2);"><span class="level-select-contents">&#x25d1;</span></a>
+	    <a href="javascript:void(0);" class="level-select" onclick="selectMaxLevel(3);"><span class="level-select-contents">&#x25d4;</span></a>
+	    <a href="javascript:void(0);" class="level-select" onclick="selectMaxLevel(4);"><span class="level-select-contents">&#x25cb;</span></a>
+	    <a href="javascript:void(0);" class="level-select" onclick="selectMaxLevel(5);"><span class="level-select-contents">&nbsp;</span></a>
+	  </div>
+	</div>
+	<div class="edit-item"><span class="edit-label">Notes</span><br/><textarea id="editNotes"></textarea></div>
+      </div>
+
+      <div id="tuneActions">
+	<input id="editAction" type="button" value="Edit" onclick="actionEdit();"></input>
+	<input id="newAction" type="button" value="New" onclick="actionNew();"></input>
+	<input id="cancelAction" type="button" value="Cancel" onclick="actionCancel();" style="display:none"></input>
+	<input id="saveAction" type="button" value="Save" onclick="actionSave();" style="display:none"></input>
+      </div>
+    </div>
+    <div id="tunesDiv">
+      <table id="tuneTable" cellspacing="0px">
+	<col id="tuneLevelCol"></col>
+	<col id="tuneRefsCol"></col>
+	<col id="tuneNameCol"></col>
+	<col id="tuneSinceCol"></col>
+	<col id="tuneFlagsCol"></col>
+	<thead>
+	</thead>
+	<tbody id="tuneBody">
+	</tbody>
+      </table>
+    </div>
+  </body>
+</html>
