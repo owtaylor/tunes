@@ -3,10 +3,8 @@
 var filterText;
 var selectedRhythm;
 var studyOnly;
-var hoverRow;
-var hoverTimeout;
+var selectedRow;
 
-var HOVER_TIME = 500;
 var COLUMN_COUNT = 5;
 
 RHYTHMS = {
@@ -106,7 +104,25 @@ function refilter() {
     }
 }
 
-function showHover(row) {
+function selectRow(row) {
+    if (selectedRow == row)
+        return;
+
+    if (selectedRow) {
+        $(selectedRow).removeClass("selected-row");
+    }
+
+    selectedRow = row;
+
+    if (!selectedRow) {
+        $("#editAction").attr("disabled", 1);
+        return;
+    }
+
+    $("#editAction").removeAttr("disabled");
+
+    $(selectedRow).addClass("selected-row");
+
     var tune = row.tune;
 
     var infoDiv = $("#infoDiv");
@@ -154,24 +170,6 @@ function showHover(row) {
         var notesDiv = _make("div", "info-notes");
         linkify(tune.notes, notesDiv);
         infoDiv.append(notesDiv);
-    }
-}
-
-function setHoverRow(row) {
-    if (row == hoverRow)
-        return;
-
-    if (hoverTimeout) {
-        clearTimeout(hoverTimeout);
-        hoverTimeout = null;
-    }
-
-    hoverRow = row;
-
-    if (row) {
-        hoverTimeout = setTimeout(function() {
-                                      showHover(row);
-                                  }, HOVER_TIME);
     }
 }
 
@@ -283,13 +281,8 @@ function createTuneRow(tune) {
     td.appendChild(document.createTextNode(flags));
     tr.appendChild(td);
 
-    $(tr).mouseover(function() {
-        setHoverRow(tr);
-    });
-
-    $(tr).mouseout(function() {
-        if (tr == hoverRow)
-            setHoverRow(null);
+    $(tr).click(function() {
+        selectRow(tr);
     });
 
     return tr;
@@ -449,6 +442,9 @@ function infoMode() {
 }
 
 function actionEdit() {
+    if (!selectedRow)
+        return;
+
     editMode();
 }
 

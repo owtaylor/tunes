@@ -59,6 +59,11 @@ a:hover {
     background: #ffeecc;
 }
 
+#tuneTable .selected-row, #tuneTable tr.selected-row:hover {
+    background: #0088aa;
+    color: white;
+}
+
 #headerDiv {
     position: fixed;
     top: 0px;
