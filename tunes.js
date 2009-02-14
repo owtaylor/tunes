@@ -4,6 +4,7 @@ var filterText;
 var selectedRhythm;
 var studyOnly;
 var selectedRow;
+var editRow;
 
 var COLUMN_COUNT = 5;
 
@@ -122,9 +123,10 @@ function selectRow(row) {
     $("#editAction").removeAttr("disabled");
 
     $(selectedRow).addClass("selected-row");
+    fillInfo(row.tune);
+}
 
-    var tune = row.tune;
-
+function fillInfo(tune) {
     var infoDiv = $("#infoDiv");
     infoDiv.empty();
 
@@ -171,6 +173,33 @@ function selectRow(row) {
         linkify(tune.notes, notesDiv);
         infoDiv.append(notesDiv);
     }
+}
+
+function selectLevel(level) {
+    $("#editLevelParent").children().removeClass("level-select-selected");
+    $("#editLevel" + level).addClass("level-select-selected");
+}
+
+function selectMaxlevel(level) {
+    $("#editMaxlevelParent").children().removeClass("level-select-selected");
+    $("#editMaxlevel" + level).addClass("level-select-selected");
+}
+
+function fillEdit(tune) {
+    $("#editName").val(tune.name);
+    $("#editAka").val(tune.aka != null ? tune.aka : "");
+    $("#editRhythm").val(tune.rhythm);
+    $("#editKey").val(tune.key);
+    $("#editRefs").val(tune.refs != null ? tune.refs : "");
+    $("#editIncipit").val(tune.incipit != null ? tune.incipit : "");
+    $("#editSince").val(tune.since != null ? tune.since : "");
+    selectLevel(tune.level);
+    selectMaxlevel(tune.maxlevel != null ? tune.maxlevel : tune.level);
+    $("#editNotes").val(tune.notes != null ? tune.notes : "");
+    if (tune.study)
+        $("#editStudy").attr("checked", true);
+    else
+        $("#editStudy").removeAttr("checked");
 }
 
 function compareTunes(a, b) {
@@ -282,7 +311,15 @@ function createTuneRow(tune) {
     tr.appendChild(td);
 
     $(tr).click(function() {
-        selectRow(tr);
+        if (!editRow)
+            selectRow(tr);
+    });
+
+    $(tr).dblclick(function() {
+        if (!editRow) {
+            selectRow(tr);
+            actionEdit(tr);
+        }
     });
 
     return tr;
@@ -411,6 +448,17 @@ function init() {
         $("#loginDiv").hide();
         $("#logoutDiv").show();
     }
+
+    $(document.body).keypress(function(event) {
+        if (event.keyCode == 27 && editRow) {
+            actionCancel();
+            event.preventDefault();
+        }
+        if (event.keyCode == 13 && editRow && event.ctrlKey) {
+            actionSave();
+            event.preventDefault();
+        }
+    });
 }
 
 // Reload the content of the page, without trigger revalidation as document.location.reload()
@@ -430,6 +478,7 @@ function editMode() {
     $("#newAction").hide();
     $("#cancelAction").show();
     $("#saveAction").show();
+    $("#editName").focus();
 }
 
 function infoMode() {
@@ -445,6 +494,8 @@ function actionEdit() {
     if (!selectedRow)
         return;
 
+    fillEdit(selectedRow.tune);
+    editRow = selectedRow;
     editMode();
 }
 
@@ -454,8 +505,10 @@ function actionNew() {
 
 function actionCancel() {
     infoMode();
+    editRow = null;
 }
 
 function actionSave() {
     infoMode();
+    editRow = null;
 }

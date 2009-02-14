@@ -32,7 +32,7 @@
       </div>
       <div id="editDiv" style="display:none">
 	<div class="edit-item"><span class="edit-label">Name</span><br/><input class="edit-value" id="editName"></input></div>
-	<div class="edit-item"><span class="edit-label">Aka</span><br/><input class="edit-value" id="editAka"></input></div>
+	<div class="edit-item"><span class="edit-label">Other names</span><br/><input class="edit-value" id="editAka"></input></div>
 	<div class="edit-item">
 	  <span class="edit-left-column edit-label">Rhythm</span>
 	  <span class="edit-right-column">
@@ -61,23 +61,24 @@
 	  </span>
 	</div>
 	<div class="edit-item">
-	  <div class="edit-left-column">
+	  <div class="edit-left-column" id="editLevelParent">
 	    <span class="edit-label">Level</span><br/>
-	    <a href="javascript:void(0);" class="level-select" onclick="selectLevel(1);"><span class="level-select-contents">&#x25cF;</span></a>
-	    <a href="javascript:void(0);" class="level-select" onclick="selectLevel(2);"><span class="level-select-contents">&#x25d1;</span></a>
-	    <a href="javascript:void(0);" class="level-select" onclick="selectLevel(3);"><span class="level-select-contents">&#x25d4;</span></a>
-	    <a href="javascript:void(0);" class="level-select" onclick="selectLevel(4);"><span class="level-select-contents">&#x25cb;</span></a>
-	    <a href="javascript:void(0);" class="level-select" onclick="selectLevel(5);"><span class="level-select-contents">&nbsp;</span></a>
+	    <a href="javascript:void(0);" id="editLevel1" class="level-select" onclick="selectLevel(1);"><span class="level-select-contents">&#x25cF;</span></a>
+	    <a href="javascript:void(0);" id="editLevel2" class="level-select" onclick="selectLevel(2);"><span class="level-select-contents">&#x25d1;</span></a>
+	    <a href="javascript:void(0);" id="editLevel3" class="level-select" onclick="selectLevel(3);"><span class="level-select-contents">&#x25d4;</span></a>
+	    <a href="javascript:void(0);" id="editLevel4" class="level-select" onclick="selectLevel(4);"><span class="level-select-contents">&#x25cb;</span></a>
+	    <a href="javascript:void(0);" id="editLevel5" class="level-select" onclick="selectLevel(5);"><span class="level-select-contents">&nbsp;</span></a>
 	  </div>
-	  <div class="edit-right-column">
+	  <div class="edit-right-column" id="editMaxlevelParent">
 	    <span class="edit-label">Max Level</span><br/>
-	    <a href="javascript:void(0);" class="level-select" onclick="selectMaxLevel(1);"><span class="level-select-contents">&#x25cF;</span></a>
-	    <a href="javascript:void(0);" class="level-select" onclick="selectMaxLevel(2);"><span class="level-select-contents">&#x25d1;</span></a>
-	    <a href="javascript:void(0);" class="level-select" onclick="selectMaxLevel(3);"><span class="level-select-contents">&#x25d4;</span></a>
-	    <a href="javascript:void(0);" class="level-select" onclick="selectMaxLevel(4);"><span class="level-select-contents">&#x25cb;</span></a>
-	    <a href="javascript:void(0);" class="level-select" onclick="selectMaxLevel(5);"><span class="level-select-contents">&nbsp;</span></a>
+	    <a href="javascript:void(0);" id="editMaxlevel1" class="level-select" onclick="selectMaxlevel(1);"><span class="level-select-contents">&#x25cF;</span></a>
+	    <a href="javascript:void(0);" id="editMaxlevel2" class="level-select" onclick="selectMaxlevel(2);"><span class="level-select-contents">&#x25d1;</span></a>
+	    <a href="javascript:void(0);" id="editMaxlevel3" class="level-select" onclick="selectMaxlevel(3);"><span class="level-select-contents">&#x25d4;</span></a>
+	    <a href="javascript:void(0);" id="editMaxlevel4" class="level-select" onclick="selectMaxlevel(4);"><span class="level-select-contents">&#x25cb;</span></a>
+	    <a href="javascript:void(0);" id="editMaxlevel5" class="level-select" onclick="selectMaxlevel(5);"><span class="level-select-contents">&nbsp;</span></a>
 	  </div>
 	</div>
+	<div class="edit-item"><input type="checkbox" id="editStudy">Study</input></div>
 	<div class="edit-item"><span class="edit-label">Notes</span><br/><textarea id="editNotes"></textarea></div>
       </div>
 
