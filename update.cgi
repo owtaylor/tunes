@@ -102,6 +102,10 @@ elif action == 'update':
     except ValidationError, e:
         raise_error(400, str(e))
 
+    # As a courtesy, we don't consider this validation, but just fix the maxlevel
+    if ('maxlevel' not in values or int(values['level']) < int(values['maxlevel'])):
+        values['maxlevel'] = values['level'];
+
     try:
         if 'id' in values:
             tune_id = values['id']
