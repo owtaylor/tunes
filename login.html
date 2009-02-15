@@ -2,21 +2,40 @@
   <head>
     <title>Owen Taylor's Tunebook</title>
     <link rel="stylesheet" href="tunes.css" type="text/css"></link>
+    <script src="jquery.min.js" type="text/javascript"></script>
+    <script src="tunes.js" type="text/javascript"></script>
+    <script type="text/javascript">
+      $(function() { initLoginPage(); });
+    </script>
   </head>
-  <body>
-  <form method="POST" action="login.cgi" accept-charset="UTF-8">
-    <table>
+  <body id="loginPage">
+    <table id="loginPageTable">
       <tbody>
 	<tr>
-	  <td>Username:</td>
-	  <td><input name="username"></input></td>
-	</tr>
-	<tr>
-	  <td>Pasword:</td>
-	  <td><input name="password" type="password"></input></td>
+	  <td>
+	    <form method="POST" action="login.cgi" accept-charset="UTF-8">
+	      <table id="loginTable">
+		<tbody>
+		  <tr>
+		    <td>Username:</td>
+		    <td><input name="username"></input></td>
+		  </tr>
+		  <tr>
+		    <td>Pasword:</td>
+		    <td><input name="password" type="password"></input></td>
+		  </tr>
+		  <tr>
+		    <td colspan="2" id="loginButtonCell">
+		      <input type="submit" value="Log in"></input>
+		    </td>
+		  </tr>
+		</tbody>
+	      </table>
+	      <input id="loginNextInput" name="next" type="hidden"></input>
+	    </form>
+	  </td>
 	</tr>
       </tbody>
     </table>
-    <input type="submit" value="Log in"></input>
-  </form>
+  </body>
 </html>

@@ -1,5 +1,6 @@
 /* -*- mode: js2; js2-basic-offset: 4; indent-tabs-mode: nil -*- */
 
+var page;
 var allTunes;
 var filterText;
 var rhythmFilter;
@@ -233,36 +234,22 @@ function getMaxlevel() {
 }
 
 function fillEdit(tune) {
-    $("#editName").val(tune.name);
+    $("#editName").val(tune.name != null ? tune.name : "");
     $("#editAka").val(tune.aka != null ? tune.aka : "");
-    $("#editRhythm").val(tune.rhythm);
-    $("#editKey").val(tune.key);
+    $("#editRhythm").val(tune.rhythm != null ? tune.rhythm : "reel");
+    $("#editKey").val(tune.key != null ? tune.key : "");
     $("#editComposer").val(tune.composer != null ? tune.composer : "");
     $("#editRefs").val(tune.refs != null ? tune.refs : "");
     $("#editIncipit").val(tune.incipit != null ? tune.incipit : "");
     $("#editSince").val(tune.since != null ? tune.since : "");
-    selectLevel(tune.level);
-    selectMaxlevel(tune.maxlevel != null ? tune.maxlevel : tune.level);
+    var level = tune.level != null ? tune.level : 5;
+    selectLevel(level);
+    selectMaxlevel(tune.maxlevel != null ? tune.maxlevel : level);
     $("#editNotes").val(tune.notes != null ? tune.notes : "");
     if (tune.study)
         $("#editStudy").attr("checked", true);
     else
         $("#editStudy").removeAttr("checked");
-}
-
-function emptyEdit() {
-    $("#editName").val("");
-    $("#editAka").val("");
-    $("#editRhythm").val("reel");
-    $("#editKey").val("");
-    $("#editComposer").val("");
-    $("#editRefs").val("");
-    $("#editIncipit").val("");
-    $("#editSince").val("");
-    selectLevel(5);
-    selectMaxlevel(5);
-    $("#editNotes").val("");
-    $("#editStudy").removeAttr("checked");
 }
 
 function fetchEditData() {
@@ -635,9 +622,11 @@ function createRhythmOptions() {
         rhythms.push(rhythm);
     rhythms.sort();
 
-    option = _make("option", null, "All");
-    option.value = "all";
-    filterRhythm.appendChild(option);
+    if (filterRhythm) {
+        option = _make("option", null, "All");
+        option.value = "all";
+        filterRhythm.appendChild(option);
+    }
 
     for (i = 0; i < rhythms.length; i++) {
         rhythm = rhythms[i];
@@ -649,13 +638,17 @@ function createRhythmOptions() {
         else
             rhythm_name = RHYTHMS[rhythm].slice(0, -1);
 
-        option = _make("option", null, rhythm_name);
-        option.value = rhythm;
-        editRhythm.appendChild(option);
+        if (editRhythm) {
+            option = _make("option", null, rhythm_name);
+            option.value = rhythm;
+            editRhythm.appendChild(option);
+        }
 
-        option = _make("option", null, RHYTHMS[rhythm]);
-        option.value = rhythm;
-        filterRhythm.appendChild(option);
+        if (filterRhythm) {
+            option = _make("option", null, RHYTHMS[rhythm]);
+            option.value = rhythm;
+            filterRhythm.appendChild(option);
+        }
     }
 }
 
@@ -692,6 +685,8 @@ function selectPrevious() {
 }
 
 function init() {
+    page = "index";
+
     $.getJSON("query.cgi",
         function(data) {
             data.sort(compareTunes);
@@ -752,6 +747,101 @@ function init() {
     });
 }
 
+function getQueryParams() {
+    var query = window.location.search.substring(1);
+    if (query == null || query == "")
+        return {};
+
+    var components = query.split(/&/);
+
+    var params = {};
+    var i;
+    for (i = 0; i < components.length; i++) {
+        var component = components[i];
+        var m = component.match(/([^=]+)=(.*)/);
+        if (m)
+            params[m[1]] = decodeURIComponent(m[2]);
+    }
+
+    return params;
+}
+
+function buildQueryString(queryParams) {
+    var result = null;
+
+    var k;
+    for (k in queryParams) {
+        var component = k + "=" + encodeURIComponent(queryParams[k]);
+        if (result == null)
+            result = component;
+        else
+            result += "&" + component;
+    }
+
+    if (result == null)
+        return "";
+    else
+        return "?" + result;
+}
+
+function getNoQueryUrl() {
+    var m = document.location.href.match(/([^?]*)/);
+    return m[1];
+}
+
+function getBaseUrl() {
+    var noQueryUrl = getNoQueryUrl();
+    var m = noQueryUrl.match(/(.*\/)[^\/]*$/);
+    return m[1];
+}
+
+function getRelativePath() {
+    var noQueryUrl = getNoQueryUrl();
+    var m = noQueryUrl.match(/.*\/([^\/]*)$/);
+    return m[1];
+}
+
+function initNewPage() {
+    page = "new";
+
+    var username = getUsername();
+    if (username != null) {
+        $("#userSpan").text(username);
+    } else {
+        if (document.location.search == null || document.location.search == "")
+            url = "login.html?next=" + getRelativePath();
+        else
+            url = "login.html" + document.location.search + "&" + "next=" + getRelativePath();
+
+        window.open(url, "_self", null);
+    }
+
+    createRhythmOptions();
+
+    $("#homeLink").attr('href', getBaseUrl());
+
+    var tune = getQueryParams();
+    if (!('name' in tune))
+        tune.level = 5;
+    if (!('level' in tune))
+        tune.level = 5;
+
+    fillEdit(tune);
+    inEdit = true;
+    $("#editName").focus();
+}
+
+function initLoginPage() {
+    page = "login";
+
+    var queryParams = getQueryParams();
+    if ('next' in queryParams) {
+        var next = queryParams['next'];
+        delete queryParams['next'];
+        $("#loginNextInput").val(next + buildQueryString(queryParams));
+    }
+}
+
 // Reload the content of the page, without trigger revalidation as document.location.reload()
 function refresh() {
     window.open(document.location.href, "_self", null, true);
@@ -803,7 +893,7 @@ function actionDelete() {
 }
 
 function actionNew() {
-    emptyEdit();
+    fillEdit({});
     selectRow(null);
     inEdit = true;
     editMode();
@@ -822,10 +912,16 @@ function actionSave() {
         data: fetchEditData(),
         dataType: "json",
         success: function(tune, status) {
-            editRow = null;
-            inEdit = false;
-            updateTunes([tune]);
-            infoMode();
+            if (page == "new") {
+                // Reload the page, removing any query parameters
+                var m = document.location.href.match("([^?]*)");
+                window.open(getNoQueryUrl(), "_self", null);
+            } else {
+                editRow = null;
+                inEdit = false;
+                updateTunes([tune]);
+                infoMode();
+            }
         },
         error: function(request, textStatus, errorThrown) {
             alert(request.responseText);
