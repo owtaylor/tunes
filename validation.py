@@ -4,13 +4,24 @@ class ValidationError(RuntimeError):
     pass
 
 RHYTHMS=set([
-        'jig',
-        'reel',
+        'air',
+        'barn dance',
+        'fling',
+        'highland',
         'hornpipe',
-        'slip jig',
-        'slide',
+        'jig',
+        'march',
+        'mazurka',
+        'piece',
+        'polka',
+        'reel',
+        'schottiche',
         'set dance',
-        'mazurka'
+        'slide',
+        'slip jig',
+        'set dance',
+        'strathspey',
+        'waltz'
         ])
 
 def validate_id(v):

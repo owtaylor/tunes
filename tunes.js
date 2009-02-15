@@ -2,7 +2,7 @@
 
 var allTunes;
 var filterText;
-var selectedRhythm;
+var rhythmFilter;
 var studyOnly;
 var selectedRow;
 var inEdit = false;
@@ -11,12 +11,23 @@ var editRow;
 var COLUMN_COUNT = 5;
 
 RHYTHMS = {
+    'air': "Airs",
+    'barn dance': "Barn Dances",
+    'fling': "Flings",
+    'highland': "Highlands",
     'hornpipe': "Hornpipes",
     'jig': "Jigs",
+    'march': "Marches",
+    'mazurka': "Mazurkas",
+    'piece': "Pieces",
+    'polka': "Polkas",
     'reel': "Reels",
-    'slip jig': "Slip Jigs",
+    'schottische' : "Schottisches",
+    'set dance': "Set Dances",
     'slide': "Slides",
-    'mazurka': "Mazurkas"
+    'slip jig': "Slip Jigs",
+    'strathspey': "Strathspeys",
+    'waltz': "Waltzes"
 };
 
 function _make(element, cls, text) {
@@ -50,12 +61,14 @@ function _makeLevelSymbol(level, maxlevel) {
 function filterChanged() {
     var newFilter = $("#filterInput").val();
     var newStudyOnly = $("#studyOnly").attr('checked');
+    var newRhythm = $("#filterRhythm").val();
 
-    if (newFilter == filterText && newStudyOnly == studyOnly)
+    if (newFilter == filterText && newStudyOnly == studyOnly && newRhythm == rhythmFilter)
         return;
 
     filterText = newFilter;
     studyOnly = newStudyOnly;
+    rhythmFilter = newRhythm;
 
     refilter();
 }
@@ -66,7 +79,7 @@ function refilter() {
         if (studyOnly && tune.study != 1)
             return false;
 
-        if (selectedRhythm != "all" && tune.rhythm != selectedRhythm)
+        if (rhythmFilter != "all" && tune.rhythm != rhythmFilter)
             return false;
 
         return filterRegexp.test(tune.name) || (tune.aka != null && filterRegexp.test(tune.aka));
@@ -556,32 +569,6 @@ function updateTunes(tunes) {
     refilter();
 }
 
-function selectRhythm(rhythm) {
-    if (rhythm == selectedRhythm)
-        return;
-
-    selectedRhythm = rhythm;
-
-    $("#rhythmDiv").children().removeClass("selected");
-    $("#rhythmDiv").children().filter(function() {
-        return this.rhythm == rhythm;
-    }).addClass("selected");
-
-    refilter();
-}
-
-function createRhythmLink(rhythm, text) {
-    var a = document.createElement("a");
-    a.href= "javascript:void(0)";
-    a.appendChild(document.createTextNode(text));
-    $(a).click(function() {
-        selectRhythm(rhythm);
-    });
-    a.rhythm = rhythm;
-
-    return a;
-}
-
 function getUsername() {
     var v = document.cookie;
     if (v == null)
@@ -604,6 +591,45 @@ function getUsername() {
     return null;
 }
 
+// Fill in the Rhythm dropdrowns - do this dynamically to avoid
+// having to maintain the rhythm list in the HTML as well
+function createRhythmOptions() {
+    var i;
+    var editRhythm = document.getElementById("editRhythm");
+    var filterRhythm = document.getElementById("filterRhythm");
+    var option;
+
+    var rhythms = [];
+    var rhythm;
+
+    for (rhythm in RHYTHMS)
+        rhythms.push(rhythm);
+    rhythms.sort();
+
+    option = _make("option", null, "All");
+    option.value = "all";
+    filterRhythm.appendChild(option);
+
+    for (i = 0; i < rhythms.length; i++) {
+        rhythm = rhythms[i];
+        var rhythm_name;
+        if (rhythm == 'march')
+            rhythm_name = "March";
+        else if (rhythm == 'waltz')
+            rhythm_name = "Waltz";
+        else
+            rhythm_name = RHYTHMS[rhythm].slice(0, -1);
+
+        option = _make("option", null, rhythm_name);
+        option.value = rhythm;
+        editRhythm.appendChild(option);
+
+        option = _make("option", null, RHYTHMS[rhythm]);
+        option.value = rhythm;
+        filterRhythm.appendChild(option);
+    }
+}
+
 function init() {
     $.getJSON("query.cgi",
         function(data) {
@@ -613,31 +639,16 @@ function init() {
             filterChanged();
         });
 
+    createRhythmOptions();
+
     $("#filterInput").focus();
     // Would have to catch oninput/onpaste to get paste right
     $("#filterInput").keyup(function() { filterChanged(); });
     $("#filterInput").change(function() { filterChanged(); });
     $("#studyOnly").change(function() { filterChanged(); });
 
-    var rythmDiv = document.getElementById("rhythmDiv");
-    var rhythm;
-
-    var rhythms = [];
-    for (rhythm in RHYTHMS) {
-        rhythms.push(rhythm);
-    }
-
-    rhythms.sort();
-
-    rythmDiv.appendChild(createRhythmLink("all", "All"));
-    var i;
-    for (i = 0; i < rhythms.length; i++) {
-        rhythm = rhythms[i];
-        rythmDiv.appendChild(document.createTextNode(" "));
-        rythmDiv.appendChild(createRhythmLink(rhythm, RHYTHMS[rhythm]));
-    }
-
-    selectRhythm("all");
+    $("#filterRhythm").val("all");
+    $("#filterRhythm").change(function() { filterChanged(); });
 
     username = getUsername();
     if (username != null) {
