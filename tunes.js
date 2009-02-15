@@ -149,6 +149,13 @@ function fillInfo(tune) {
         details += " - " + tune.structure;
     infoDiv.append(_make("div", "info-details", details));
 
+    if (tune.composer != null) {
+        var composerDiv = _make("div", "info-composer");
+        composerDiv.appendChild(_make("span", "info-label", "Composer: "));
+        composerDiv.appendChild(_make("span", "info-value", tune.composer));
+        infoDiv.append(composerDiv);
+    }
+
     if (tune.refs != null) {
         var refsDiv = _make("div", "info-refs");
         linkify(tune.refs, refsDiv);
@@ -211,6 +218,7 @@ function fillEdit(tune) {
     $("#editAka").val(tune.aka != null ? tune.aka : "");
     $("#editRhythm").val(tune.rhythm);
     $("#editKey").val(tune.key);
+    $("#editComposer").val(tune.composer != null ? tune.composer : "");
     $("#editRefs").val(tune.refs != null ? tune.refs : "");
     $("#editIncipit").val(tune.incipit != null ? tune.incipit : "");
     $("#editSince").val(tune.since != null ? tune.since : "");
@@ -229,6 +237,7 @@ function fetchEditData() {
         aka : $("#editAka").val(),
         rhythm : $("#editRhythm").val(),
         key : $("#editKey").val(),
+        composer : $("#editComposer").val(),
         refs : $("#editRefs").val(),
         incipit : $("#editIncipit").val(),
         since : $("#editSince").val(),
