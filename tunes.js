@@ -11,6 +11,7 @@ var editId = null;
 var dialogUp = false;
 
 var COLUMN_COUNT = 5;
+var BASE_TITLE = "Owen Taylor's Tunebook";
 
 RHYTHMS = {
     'air': "Airs",
@@ -827,14 +828,14 @@ function initEditPage() {
             function(tunes) {
                 if (tunes.length > 0) {
                     var tune = tunes[0];
-                    document.title = document.title + " - Editing " + tune.name;
+                    document.title = BASE_TITLE + " - Editing " + tune.name;
                     fillEdit(tune);
                     editId = tune.id;
                 }
             });
 
     } else {
-        document.title = document.title + " - New Tune";
+        document.title = BASE_TITLE + " - New Tune";
 
         if (!('name' in queryParams))
             queryParams.level = 5;
@@ -932,9 +933,13 @@ function actionSave() {
         dataType: "json",
         success: function(tune, status) {
             if (page == "edit") {
-                // Reload the page, removing any query parameters
-                var m = document.location.href.match("([^?]*)");
-                window.open(getNoQueryUrl(), "_self", null);
+                if (editId) {
+                    fillEdit(tune);
+                    document.title = BASE_TITLE + " - Editing " + tune.name;
+                } else {
+                    // We reload to get a better URL and title
+                    window.open(getNoQueryUrl() + "?id=" + tune.id, "_self", null);
+                }
             } else {
                 editId = null;
                 inEdit = false;
