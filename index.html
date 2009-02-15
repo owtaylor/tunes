@@ -78,6 +78,7 @@
 
       <div id="tuneActions">
 	<input id="editAction" type="button" value="Edit" onclick="actionEdit();" disabled="1"></input>
+	<input id="deleteAction" type="button" value="Delete" onclick="actionDelete();" disabled="1"></input>
 	<input id="newAction" type="button" value="New" onclick="actionNew();"></input>
 	<input id="cancelAction" type="button" value="Cancel" onclick="actionCancel();" style="display:none"></input>
 	<input id="saveAction" type="button" value="Save" onclick="actionSave();" style="display:none"></input>
@@ -93,6 +94,25 @@
 	<thead>
 	</thead>
 	<tbody id="tuneBody">
+	</tbody>
+      </table>
+    </div>
+    <div id="dialogDiv" style="display:none;">
+      <div id="dialogBackgroundDiv"></div>
+      <table>
+	<tbody>
+	  <tr>
+	    <td>
+	      <div id="dialogContentsDiv">
+		<div id="dialogMessageDiv"></div>
+		<div id="dialogButtonDiv">
+		  <input  id="dialogCancelButton" type="button" value="Cancel" onclick="dialogCancelClicked();"></input>
+		  <input id="dialogOKButton" type="button" value="OK" onclick="dialogOKClicked();"></input>
+		</div>
+		<div id="dialogBottomDiv"></div>
+	      </div>
+	    </td>
+	  </tr>
 	</tbody>
       </table>
     </div>

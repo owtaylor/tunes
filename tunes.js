@@ -6,6 +6,7 @@ var rhythmFilter;
 var studyOnly;
 var selectedRow;
 var inEdit = false;
+var dialogUp = false;
 var editRow;
 
 var COLUMN_COUNT = 5;
@@ -134,10 +135,12 @@ function selectRow(row) {
 
     if (!selectedRow) {
         $("#editAction").attr("disabled", 1);
+        $("#deleteAction").attr("disabled", 1);
         return;
     }
 
     $("#editAction").removeAttr("disabled");
+    $("#deleteAction").removeAttr("disabled");
 
     $(selectedRow).addClass("selected-row");
     fillInfo(row.tune);
@@ -537,6 +540,7 @@ function updateTuneElements() {
 
 function updateTunes(tunes) {
     var i;
+    var tune;
     var newTunes = {};
     var replacedTunes = {};
     for (i = 0; i < tunes.length; i++) {
@@ -569,13 +573,38 @@ function updateTunes(tunes) {
     refilter();
 }
 
+function deleteTunes(ids) {
+    var i;
+
+    var deletedMap = {};
+    for (i = 0; i < ids.length; i++) {
+        deletedMap[ids[i]] = 1;
+    }
+
+    var newAllTunes = [];
+    for (i = 0; i < allTunes.length; i++) {
+        var tune = allTunes[i];
+        if (!(tune.id in deletedMap))
+            newAllTunes.push(tune);
+    }
+
+    allTunes = newAllTunes;
+
+    $("#tuneBody").children().filter(function() {
+        return this.tune != null && this.tune.id in deletedMap;
+    }).remove();
+
+    updateTuneElements(allTunes);
+    refilter();
+}
+
 function getUsername() {
     var v = document.cookie;
     if (v == null)
         return null;
 
     // Strip surrounding whitespace
-    v = v.replace(/^\s*(.*?)\s+$/, "$1");
+    v = v.replace(/^\s*(.*?)\s*$/, "$1");
     if (v == "")
         return null;
 
@@ -630,6 +659,38 @@ function createRhythmOptions() {
     }
 }
 
+function selectNext() {
+    if (!selectedRow)
+        return false;
+
+    var node = selectedRow.nextSibling;
+    while (node) {
+        if (node.tune != null && !node.filtered) {
+            selectRow(node);
+            return true;
+        }
+        node = node.nextSibling;
+    }
+
+    return false;
+}
+
+function selectPrevious() {
+    if (!selectedRow)
+        return false;
+
+    var node = selectedRow.previousSibling;
+    while (node) {
+        if (node.tune != null && !node.filtered) {
+            selectRow(node);
+            return true;
+        }
+        node = node.previousSibling;
+    }
+
+    return false;
+}
+
 function init() {
     $.getJSON("query.cgi",
         function(data) {
@@ -658,30 +719,26 @@ function init() {
     }
 
     $(document.body).keydown(function(event) {
+        if (dialogUp) {
+            // This doens't work since we don't get the keystroke
+            if (event.keyCode == 27 && inEdit) {
+                dialogCancelClicked();
+                event.preventDefault();
+            }
+
+            return;
+        }
+
         if (selectedRow && !inEdit) {
             if (event.keyCode == 38) { // Up arrow
                 event.preventDefault();
                 event.stopPropagation();
-                var node = selectedRow.previousSibling;
-                while (node) {
-                    if (node.tune != null && !node.filtered) {
-                        selectRow(node);
-                        break;
-                    }
-                    node = node.previousSibling;
-                }
+                selectPrevious();
             }
             else if (event.keyCode == 40) { // Down arrow
                 event.preventDefault();
                 event.stopPropagation();
-                var node = selectedRow.nextSibling;
-                while (node) {
-                    if (node.tune != null && !node.filtered) {
-                        selectRow(node);
-                        break;
-                    }
-                    node = node.nextSibling;
-                }
+                selectNext();
             }
         }
         if (event.keyCode == 27 && inEdit) {
@@ -735,6 +792,16 @@ function actionEdit() {
     editMode();
 }
 
+function actionDelete() {
+    if (!selectedRow)
+        return;
+
+    $("#dialogMessageDiv").text("Really delete \u201c" + selectedRow.tune.name + "\u201d?");
+    $("#dialogDiv").show();
+    $("#dialogCancelButton").focus();
+    dialogUp = true;
+}
+
 function actionNew() {
     emptyEdit();
     selectRow(null);
@@ -764,4 +831,45 @@ function actionSave() {
             alert(request.responseText);
         }
     });
+}
+
+function dialogOKClicked() {
+    $("#dialogDiv").hide();
+    dialogUp = false;
+
+    // Only one thing that the dialog does now, no need to generalize at the moment
+
+    // Delete the selected row
+
+    if (!selectedRow)
+        return;
+
+    var deletedId = selectedRow.tune.id;
+
+    $.ajax({
+        url: "update.cgi",
+        type: "POST",
+        data: {
+            action: 'delete',
+            id: deletedId
+        },
+        dataType: "json",
+        success: function(tune, status) {
+            if (selectedRow && selectedRow.tune.id == deletedId) {
+                // Try to select some other row
+                if (!selectNext() && !selectPrevious())
+                    selectRow(null);
+            }
+
+            deleteTunes([deletedId]);
+        },
+        error: function(request, textStatus, errorThrown) {
+            alert(request.responseText);
+        }
+    });
+}
+
+function dialogCancelClicked() {
+    $("#dialogDiv").hide();
+    dialogUp = false;
 }

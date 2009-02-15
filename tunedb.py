@@ -124,6 +124,13 @@ WHERE id = :id""",
         self.conn.commit()
         cursor.close()
 
+    def delete_tune(self, tune_id):
+        cursor = self.conn.cursor()
+
+        cursor.execute(r"""DELETE FROM Tune WHERE id = :id""",
+                       { 'id' : tune_id });
+        self.conn.commit()
+        cursor.close()
 
     def close(self):
         self.conn.close()
