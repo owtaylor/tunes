@@ -1,15 +1,19 @@
 import config
+import re
 import sqlite3 as sqlite
 
 class TuneDB:
     def __init__(self):
         self.conn = sqlite.connect(config.TUNES_DB)
 
-    def query_tunes(self, tune_id=None):
+    def query_tunes(self, tune_id=None, ref=None):
         cursor = self.conn.cursor()
 
-        if tune_id != None:
-            where = "where id=:id"
+        if ref != None:
+            where = 'WHERE refs LIKE :ref ESCAPE "\\"';
+            values = { 'ref' : "%" + ref.replace("%", r"\%").replace("_", r"\_") + "%" }
+        elif tune_id != None:
+            where = "WHERE id=:id"
             values = { 'id' : tune_id }
         else:
             where = ""
@@ -47,6 +51,14 @@ ORDER BY id""", values);
             for k in values.keys():
                 if values[k] is None:
                     del values[k]
+
+            # We need a post-process check here to avoid ng1 matching ng12
+            if ref != None:
+                if 'refs' not in values:
+                    continue
+                refs = [x.lower() for x in re.split("\s+", values['refs'].strip())]
+                if ref.lower() not in refs:
+                    continue
 
             yield values
 
@@ -126,7 +138,6 @@ WHERE id = :id""",
 
     def delete_tune(self, tune_id):
         cursor = self.conn.cursor()
-
         cursor.execute(r"""DELETE FROM Tune WHERE id = :id""",
                        { 'id' : tune_id });
         self.conn.commit()

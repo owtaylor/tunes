@@ -13,10 +13,10 @@ import time
 import config
 from tunedb import TuneDB
 
-def do_query(db):
+def do_query(db, ref=None, tune_id=None):
     first = True
     sys.stdout.write("[")
-    for values in db.query_tunes():
+    for values in db.query_tunes(ref=ref, tune_id=tune_id):
         if not first:
             sys.stdout.write(",\n")
         else:
@@ -55,8 +55,19 @@ def parse_http_date(datestr):
 # Turn on verbose exception handling
 cgitb.enable()
 
-s = os.stat(config.TUNES_DB)
+form = cgi.FieldStorage()
 
+def get_field(fieldname):
+    res = form.getfirst(fieldname, "").strip()
+    if res == "":
+        return None
+    else:
+        return res
+
+ref = get_field('ref');
+tune_id = get_field('id')
+
+s = os.stat(config.TUNES_DB)
 last_modified = s.st_mtime
 
 # For testing ease, include this script in the modified time
@@ -81,5 +92,5 @@ print "Content-Type: text/plain"
 print "Last-Modified: " + format_http_date(last_modified)
 print
 
-do_query(db)
+do_query(db, ref=ref, tune_id=tune_id)
 db.close()
