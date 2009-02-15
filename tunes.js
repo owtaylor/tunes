@@ -1,5 +1,6 @@
 /* -*- mode: js2; js2-basic-offset: 4; indent-tabs-mode: nil -*- */
 
+var allTunes;
 var filterText;
 var selectedRhythm;
 var studyOnly;
@@ -185,6 +186,26 @@ function selectMaxlevel(level) {
     $("#editMaxlevel" + level).addClass("level-select-selected");
 }
 
+function getLevel() {
+    var level;
+    for (level = 1; level <= 5; level++) {
+        if ($("#editLevel" + level).hasClass("level-select-selected"))
+            return level;
+    }
+
+    throw "No selected level";
+}
+
+function getMaxlevel() {
+    var level;
+    for (level = 1; level <= 5; level++) {
+        if ($("#editMaxlevel" + level).hasClass("level-select-selected"))
+            return level;
+    }
+
+    throw "No selected maxlevel";
+}
+
 function fillEdit(tune) {
     $("#editName").val(tune.name);
     $("#editAka").val(tune.aka != null ? tune.aka : "");
@@ -200,6 +221,28 @@ function fillEdit(tune) {
         $("#editStudy").attr("checked", true);
     else
         $("#editStudy").removeAttr("checked");
+}
+
+function fetchEditData() {
+    var result = {
+        name : $("#editName").val(),
+        aka : $("#editAka").val(),
+        rhythm : $("#editRhythm").val(),
+        key : $("#editKey").val(),
+        refs : $("#editRefs").val(),
+        incipit : $("#editIncipit").val(),
+        since : $("#editSince").val(),
+        level : getLevel(),
+        maxlevel : getMaxlevel(),
+        notes : $("#editNotes").val(),
+        study : $("#editStudy").attr("checked") ? '1' : '0'
+    };
+
+    if (editRow != null) {
+        result.id = editRow.tune.id;
+    }
+
+    return result;
 }
 
 function compareTunes(a, b) {
@@ -325,19 +368,87 @@ function createTuneRow(tune) {
     return tr;
 }
 
-function createTuneElements(tunes) {
+// When this is called:
+//
+//  - allTunes has been updated with the correct values
+//  - any tunes that have been updated or changed have been removed
+//    from the tune table (but headers may have been left)
+//  - allTunes and the tune table are sorted in the same order
+//
+function updateTuneElements() {
     var i;
     var tuneBody = document.getElementById("tuneBody");
 
     var rhythm;
     var key;
 
-    for (i = 0; i < tunes.length; i++) {
-        var tune = tunes[i];
+    // Make a copy of the old rows, since deleting children may confuse things
+    // element.childNodes() doesn't support slice() which we could use to
+    // copy a normal array
+    var tmp = tuneBody.childNodes;
+    var oldRows = [];
+    for (i = 0; i < tmp.length; i++) {
+        oldRows.push(tmp[i]);
+    }
 
+    var oldIndex = 0;
+
+    for (i = 0; i < allTunes.length; i++) {
+        var tune = allTunes[i];
+
+        var oldRow;
+        if (oldIndex < oldRows.length)
+            oldRow = oldRows[oldIndex];
+        else
+            oldRow = null;
+
+        // See if we have any stale headers to remove
+        if (oldRow && oldRow.tune == null) {
+            if (oldRow.rhythm < tune.rhythm ||
+                (oldRow.rhythm == tune.rhythm &&
+                 oldRow.key < tune.key)) {
+                $(oldRow).remove();
+                oldIndex++;
+                if (oldIndex < oldRows.length)
+                    oldRow = oldRows[oldIndex];
+                else
+                    oldRow = null;
+            }
+        }
+
+        var tr;
         if (tune.rhythm != rhythm || tune.key != key) {
-            var tr = document.createElement("tr");
-            var th;
+            // Need a header
+
+            if (oldRow && oldRow.tune == null &&
+                oldRow.rhythm == tune.rhythm &&
+                oldRow.key == tune.key) {
+                // Already have the right header in the right place, may have to adjust its class
+                tr = oldRow;
+                oldIndex++;
+                if (oldIndex < oldRows.length)
+                    oldRow = oldRows[oldIndex];
+                else
+                    oldRow = null;
+            } else {
+                // Create a new header
+                tr = document.createElement("tr");
+                var th;
+
+                th = document.createElement("th");
+                th.appendChild(document.createTextNode(RHYTHMS[tune.rhythm] + " - " + tune.key));
+                th.colSpan = COLUMN_COUNT;
+                tr.appendChild(th);
+                tr.rhythm = rhythm;
+                tr.key = key;
+
+                if (oldRow) {
+                    $(oldRow).before(tr);
+                } else {
+                    tuneBody.appendChild(tr);
+                }
+            }
+
 
             if (tune.rhythm != rhythm) {
                 tr.className = "section-header rhythm-header";
@@ -345,19 +456,70 @@ function createTuneElements(tunes) {
                 tr.className = "section-header";
             }
 
-            th = document.createElement("th");
-            th.appendChild(document.createTextNode(RHYTHMS[tune.rhythm] + " - " + tune.key));
-            th.colSpan = COLUMN_COUNT;
-            tr.appendChild(th);
-
-            tuneBody.appendChild(tr);
-
             rhythm = tune.rhythm;
             key = tune.key;
         }
 
-        tuneBody.appendChild(createTuneRow(tune));
+        if (oldRow && oldRow.tune && oldRow.tune.id == tune.id) {
+            // Already have this tune, skip it
+            oldIndex++;
+            if (oldIndex < oldRows.length)
+                oldRow = oldRows[oldIndex];
+            else
+                oldRow = null;
+        } else {
+            // New tune to insert
+            tr = createTuneRow(tune);
+            if (oldRow) {
+                $(oldRow).before(tr);
+            } else {
+                tuneBody.appendChild(tr);
+            }
+
+            if (selectedRow && selectedRow.tune.id == tune.id) {
+                selectRow(tr);
+            }
+        }
     }
+
+    // Any remaining old tunes are dead headers
+    for (; oldIndex < oldRows.length; oldIndex++) {
+        $(oldRows[oldIndex]).remove();
+    }
+}
+
+function updateTunes(tunes) {
+    var i;
+    var newTunes = {};
+    var replacedTunes = {};
+    for (i = 0; i < tunes.length; i++) {
+        tune = tunes[i];
+        newTunes[tune.id] = tune;
+    }
+
+    for (i = 0; i < allTunes.length; i++) {
+        tune = allTunes[i];
+        if (tune.id in newTunes) {
+            allTunes[i] = newTunes[tune.id];
+            delete newTunes[tune.id];
+            replacedTunes[tune.id] = 1;
+        }
+    }
+
+    for (id in newTunes) {
+        allTunes.append(newTunes[id]);
+    }
+
+    allTunes.sort(compareTunes);
+
+    // Remove the rows that are changed, so that the update is a pure insert of
+    // new tunes
+    $("#tuneBody").children().filter(function() {
+        return this.tune != null && this.tune.id in replacedTunes;
+    }).remove();
+
+    updateTuneElements(allTunes);
+    refilter();
 }
 
 function selectRhythm(rhythm) {
@@ -412,7 +574,8 @@ function init() {
     $.getJSON("query.cgi",
         function(data) {
             data.sort(compareTunes);
-            createTuneElements(data);
+            allTunes = data;
+            updateTuneElements();
             filterChanged();
         });
 
@@ -509,6 +672,18 @@ function actionCancel() {
 }
 
 function actionSave() {
-    infoMode();
-    editRow = null;
+    $.ajax({
+        url: "update.cgi",
+        type: "POST",
+        data: fetchEditData(),
+        dataType: "json",
+        success: function(tune, status) {
+            editRow = null;
+            updateTunes([tune]);
+            infoMode();
+        },
+        error: function(request, textStatus, errorThrown) {
+            alert(request.responseText);
+        }
+    });
 }
