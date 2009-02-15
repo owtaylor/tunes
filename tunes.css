@@ -325,20 +325,20 @@ a:hover {
     clear: both;
 }
 
-#newPageBody {
+#editPageBody {
     margin-left: auto;
     margin-right: auto;
     width: 30em;
 }
 
-#newPageUserDiv {
+#editPageUserDiv {
     position: absolute;
     top: 0.5em;
     right: 0.5em;
     text-align: right;
 }
 
-#newPageBody #tuneActions {
+#editPageBody #tuneActions {
     position: static;
     float: right;
 }

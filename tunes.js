@@ -7,8 +7,8 @@ var rhythmFilter;
 var studyOnly;
 var selectedRow;
 var inEdit = false;
+var editId = null;
 var dialogUp = false;
-var editRow;
 
 var COLUMN_COUNT = 5;
 
@@ -268,8 +268,8 @@ function fetchEditData() {
         study : $("#editStudy").attr("checked") ? '1' : '0'
     };
 
-    if (editRow != null) {
-        result.id = editRow.tune.id;
+    if (editId != null) {
+        result.id = editId;
     }
 
     return result;
@@ -801,8 +801,8 @@ function getRelativePath() {
     return m[1];
 }
 
-function initNewPage() {
-    page = "new";
+function initEditPage() {
+    page = "edit";
 
     var username = getUsername();
     if (username != null) {
@@ -820,13 +820,30 @@ function initNewPage() {
 
     $("#homeLink").attr('href', getBaseUrl());
 
-    var tune = getQueryParams();
-    if (!('name' in tune))
-        tune.level = 5;
-    if (!('level' in tune))
-        tune.level = 5;
+    var queryParams = getQueryParams();
 
-    fillEdit(tune);
+    if (queryParams.id) {
+        $.getJSON("query.cgi?id=" + queryParams.id,
+            function(tunes) {
+                if (tunes.length > 0) {
+                    var tune = tunes[0];
+                    document.title = document.title + " - Editing " + tune.name;
+                    fillEdit(tune);
+                    editId = tune.id;
+                }
+            });
+
+    } else {
+        document.title = document.title + " - New Tune";
+
+        if (!('name' in queryParams))
+            queryParams.level = 5;
+        if (!('level' in queryParams))
+            queryParams.level = 5;
+
+        fillEdit(queryParams);
+    }
+
     inEdit = true;
     $("#editName").focus();
 }
@@ -879,7 +896,7 @@ function actionEdit() {
         return;
 
     fillEdit(selectedRow.tune);
-    editRow = selectedRow;
+    editId = selectedRow.tune.id;
     inEdit = true;
     editMode();
 }
@@ -903,7 +920,7 @@ function actionNew() {
 
 function actionCancel() {
     infoMode();
-    editRow = null;
+    editId = null;
     inEdit = false;
 }
 
@@ -914,12 +931,12 @@ function actionSave() {
         data: fetchEditData(),
         dataType: "json",
         success: function(tune, status) {
-            if (page == "new") {
+            if (page == "edit") {
                 // Reload the page, removing any query parameters
                 var m = document.location.href.match("([^?]*)");
                 window.open(getNoQueryUrl(), "_self", null);
             } else {
-                editRow = null;
+                editId = null;
                 inEdit = false;
                 updateTunes([tune]);
                 infoMode();
