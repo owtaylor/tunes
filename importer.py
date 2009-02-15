@@ -5,6 +5,7 @@ import sqlite3 as sqlite
 import re
 import sys
 
+from tunedb import TuneDB
 from validation import ValidationError, validate_key_value, validate_mandatory
 
 have_error = False
@@ -158,24 +159,6 @@ def compare_tunes(a, b):
 
     return 0
 
-def store_tunes(conn):
-    cursor = conn.cursor()
-
-    for tune in tunes:
-        values = dict(tune)
-        for key in ('aka', 'composer', 'incipit', 'maxlevel', 'notes', 'refs', 'since', 'structure', 'study'):
-            if not key in values:
-                values[key] = None
-
-        cursor.execute(r"""
-INSERT INTO Tune
-    ( aka,  composer,  incipit,  key,  level,  maxlevel,  name,  notes,  refs,  rhythm,  since,  structure,  study)
-VALUES
-    (:aka, :composer, :incipit, :key, :level, :maxlevel, :name, :notes, :refs, :rhythm, :since, :structure, :study);
-""", values)
-    conn.commit()
-    cursor.close()
-
 output = None
 i = 1
 while i < len(sys.argv):
@@ -193,9 +176,9 @@ if have_error:
 tunes.sort(compare_tunes)
 
 if output != None:
-    conn = sqlite.connect(output)
-    store_tunes(conn)
-    conn.close()
+    db = TuneDB()
+    db.insert_tunes(tunes)
+    db.close()
 else:
     for tune in tunes:
         print json.dumps(tune)

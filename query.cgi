@@ -11,51 +11,19 @@ import sys
 import time
 
 import config
+from tunedb import TuneDB
 
-def do_query(conn):
-    cursor = conn.cursor()
-
-    cursor.execute(r"""
-SELECT id, aka, composer, incipit, `key`, level, maxlevel, name, notes, refs, rhythm, since, structure, study
-  FROM Tune
-  ORDER BY id;
-""")
-
+def do_query(db):
     first = True
     sys.stdout.write("[")
-    while True:
-        row = cursor.fetchone()
-        if row == None:
-            break
+    for values in db.query_tunes():
         if not first:
             sys.stdout.write(",\n")
         else:
             first = False
-        (id, aka, composer, incipit, key, level, maxlevel, name, notes, refs, rhythm, since, structure, study) = row
-
-        values = {'id': id,
-                  'aka' : aka,
-                  'composer' : composer,
-                  'incipit' : incipit,
-                  'key' : key,
-                  'level' : level,
-                  'maxlevel' : maxlevel,
-                  'name' : name,
-                  'notes' : notes,
-                  'refs' : refs,
-                  'rhythm' : rhythm,
-                  'since' : since,
-                  'structure' : structure,
-                  'study' : study};
-
-        for k in values.keys():
-            if values[k] is None:
-                del values[k]
 
         json.dump(values, sys.stdout);
     sys.stdout.write("]\n")
-
-    cursor.close()
 
 # Adapted from http://stackoverflow.com/questions/225086/rfc-1123-date-representation-in-python
 def format_http_date(t):
@@ -107,11 +75,11 @@ if 'HTTP_IF_MODIFIED_SINCE' in os.environ:
         print
         sys.exit(0)
 
-conn = sqlite.connect(config.TUNES_DB)
+db = TuneDB()
 
 print "Content-Type: text/plain"
 print "Last-Modified: " + format_http_date(last_modified)
 print
 
-do_query(conn)
-conn.close()
+do_query(db)
+db.close()
