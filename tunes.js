@@ -856,6 +856,7 @@ function editMode() {
     $("#infoDiv").hide();
     $("#editDiv").show();
     $("#editAction").hide();
+    $("#deleteAction").hide();
     $("#newAction").hide();
     $("#cancelAction").show();
     $("#saveAction").show();
@@ -866,6 +867,7 @@ function infoMode() {
     $("#infoDiv").show();
     $("#editDiv").hide();
     $("#editAction").show();
+    $("#deleteAction").show();
     $("#newAction").show();
     $("#cancelAction").hide();
     $("#saveAction").hide();
