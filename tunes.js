@@ -95,8 +95,10 @@ function refilter() {
                     lastheader = null;
                 }
 
+                row.filtered = false;
                 $(row).show();
             } else {
+                row.filtered = true;
                 $(row).hide();
             }
         }
@@ -362,15 +364,22 @@ function createTuneRow(tune) {
     td.appendChild(document.createTextNode(flags));
     tr.appendChild(td);
 
-    $(tr).click(function() {
-        if (!editRow)
+    $(tr).click(function(event) {
+        if (!editRow) {
             selectRow(tr);
+        }
+
+        // Keeping the focus on an input area is necessary so that
+        // we get keystrokes like Up/Down arrow keys. Unfortunately,
+        $("#filterInput").focus();
     });
 
-    $(tr).dblclick(function() {
+    $(tr).dblclick(function(event) {
         if (!editRow) {
             selectRow(tr);
             actionEdit(tr);
+        } else {
+            $("#filterInput").focus();
         }
     });
 
@@ -621,7 +630,33 @@ function init() {
         $("#logoutDiv").show();
     }
 
-    $(document.body).keypress(function(event) {
+    $(document.body).keydown(function(event) {
+        if (selectedRow && !editRow) {
+            if (event.keyCode == 38) { // Up arrow
+                event.preventDefault();
+                event.stopPropagation();
+                var node = selectedRow.previousSibling;
+                while (node) {
+                    if (node.tune != null && !node.filtered) {
+                        selectRow(node);
+                        break;
+                    }
+                    node = node.previousSibling;
+                }
+            }
+            else if (event.keyCode == 40) { // Down arrow
+                event.preventDefault();
+                event.stopPropagation();
+                var node = selectedRow.nextSibling;
+                while (node) {
+                    if (node.tune != null && !node.filtered) {
+                        selectRow(node);
+                        break;
+                    }
+                    node = node.nextSibling;
+                }
+            }
+        }
         if (event.keyCode == 27 && editRow) {
             actionCancel();
             event.preventDefault();
