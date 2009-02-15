@@ -5,6 +5,7 @@ var filterText;
 var selectedRhythm;
 var studyOnly;
 var selectedRow;
+var inEdit = false;
 var editRow;
 
 var COLUMN_COUNT = 5;
@@ -233,6 +234,21 @@ function fillEdit(tune) {
         $("#editStudy").removeAttr("checked");
 }
 
+function emptyEdit() {
+    $("#editName").val("");
+    $("#editAka").val("");
+    $("#editRhythm").val("reel");
+    $("#editKey").val("");
+    $("#editComposer").val("");
+    $("#editRefs").val("");
+    $("#editIncipit").val("");
+    $("#editSince").val("");
+    selectLevel(5);
+    selectMaxlevel(5);
+    $("#editNotes").val("");
+    $("#editStudy").removeAttr("checked");
+}
+
 function fetchEditData() {
     var result = {
         name : $("#editName").val(),
@@ -365,7 +381,7 @@ function createTuneRow(tune) {
     tr.appendChild(td);
 
     $(tr).click(function(event) {
-        if (!editRow) {
+        if (!inEdit) {
             selectRow(tr);
         }
 
@@ -375,7 +391,7 @@ function createTuneRow(tune) {
     });
 
     $(tr).dblclick(function(event) {
-        if (!editRow) {
+        if (!inEdit) {
             selectRow(tr);
             actionEdit(tr);
         } else {
@@ -525,7 +541,7 @@ function updateTunes(tunes) {
     }
 
     for (id in newTunes) {
-        allTunes.append(newTunes[id]);
+        allTunes.push(newTunes[id]);
     }
 
     allTunes.sort(compareTunes);
@@ -631,7 +647,7 @@ function init() {
     }
 
     $(document.body).keydown(function(event) {
-        if (selectedRow && !editRow) {
+        if (selectedRow && !inEdit) {
             if (event.keyCode == 38) { // Up arrow
                 event.preventDefault();
                 event.stopPropagation();
@@ -657,11 +673,11 @@ function init() {
                 }
             }
         }
-        if (event.keyCode == 27 && editRow) {
+        if (event.keyCode == 27 && inEdit) {
             actionCancel();
             event.preventDefault();
         }
-        if (event.keyCode == 13 && editRow && event.ctrlKey) {
+        if (event.keyCode == 13 && event.ctrlKey && inEdit) {
             actionSave();
             event.preventDefault();
         }
@@ -695,6 +711,7 @@ function infoMode() {
     $("#newAction").show();
     $("#cancelAction").hide();
     $("#saveAction").hide();
+    $("#filterInput").focus();
 }
 
 function actionEdit() {
@@ -703,16 +720,21 @@ function actionEdit() {
 
     fillEdit(selectedRow.tune);
     editRow = selectedRow;
+    inEdit = true;
     editMode();
 }
 
 function actionNew() {
+    emptyEdit();
+    selectRow(null);
+    inEdit = true;
     editMode();
 }
 
 function actionCancel() {
     infoMode();
     editRow = null;
+    inEdit = false;
 }
 
 function actionSave() {
@@ -723,6 +745,7 @@ function actionSave() {
         dataType: "json",
         success: function(tune, status) {
             editRow = null;
+            inEdit = false;
             updateTunes([tune]);
             infoMode();
         },
