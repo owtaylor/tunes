@@ -5,6 +5,8 @@ import sqlite3 as sqlite
 import re
 import sys
 
+from validation import ValidationError, validate_key_value, validate_mandatory
+
 have_error = False
 tunes = []
 
@@ -44,57 +46,6 @@ LEVELS = {
     'x' : 5
 }
 
-RHYTHMS=set([
-        'jig',
-        'reel',
-        'hornpipe',
-        'slip jig',
-        'slide',
-        'set dance',
-        'mazurka'
-        ])
-
-def validate_key(v):
-    if not re.match("[ABCDEFG][b#]?(maj|min|mix|dor)$", v):
-        raise ParseError("Bad key '%s'" % v)
-
-def validate_rhythm(v):
-    if not v in RHYTHMS:
-        raise ParseError("Bad rhythm '%s'" % v)
-
-def validate_since(v):
-    if not re.match("<?\d\d\d\d$", v):
-        raise ParseError("Bad since '%s'" % v)
-
-def validate_structure(v):
-    if not re.match("[A-Z]+$", v):
-        raise ParseError("Bad structure '%s'" % v)
-
-def validate_study(v):
-    if v != '1':
-        raise ParseError("Bad study '%s'" % v)
-
-def validate_level(v):
-    if not re.match("[12345]$", v):
-        raise ParseError("Bad level '%s'" % v)
-
-MANDATORY = ['key', 'level', 'name', 'rhythm' ]
-
-VALIDATORS = {
-    'aka' : [],
-    'composer' : [],
-    'incipit' : [],
-    'key' : [validate_key],
-    'level' : [validate_level],
-    'maxlevel' : [validate_level],
-    'name' : [],
-    'notes' : [],
-    'refs' : [],
-    'rhythm' : [validate_rhythm],
-    'since' : [validate_since],
-    'structure' : [validate_structure],
-    'study' : [validate_study]
-}
 
 def iter_keys(s):
     pos = 0
@@ -109,11 +60,7 @@ def iter_keys(s):
         else:
             k,v = ('refs', m.group(4))
 
-        if k not in VALIDATORS:
-            raise ParseError("Bad key '%s'", k)
-
-        for validator in VALIDATORS[k]:
-            validator(v)
+        validate_key_value(k, v);
 
         yield k,v
 
@@ -143,14 +90,11 @@ def parse_tune(s, defaults):
                 keys['refs'] = v
         else:
             if k in keys:
-                raise ParseError("duplicate key '%s'", key)
+                raise ValidationError("duplicate key '%s'", key)
             else:
                 keys[k] = v
 
-    for k in MANDATORY:
-        if not k in keys:
-            raise ParseError("Missing mandatory key '%'", key)
-
+    validate_mandatory(keys);
     tunes.append(keys)
 
 def read_tunes_from_file(filename):
@@ -171,6 +115,9 @@ def read_tunes_from_file(filename):
             else:
                 raise ParseError("Unrecognized line")
         except ParseError, e:
+            print >>sys.stderr, "%s:%d: %s" % (filename, lineno, e)
+            have_error = True
+        except ValidationError, e:
             print >>sys.stderr, "%s:%d: %s" % (filename, lineno, e)
             have_error = True
     f.close()
