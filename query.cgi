@@ -110,7 +110,6 @@ if 'HTTP_IF_MODIFIED_SINCE' in os.environ:
 conn = sqlite.connect(config.TUNES_DB)
 
 print "Content-Type: text/plain"
-print "Content-Type: text/plain"
 print "Last-Modified: " + format_http_date(last_modified)
 print
 
