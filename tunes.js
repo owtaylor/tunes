@@ -820,6 +820,7 @@ function initEditPage() {
     createRhythmOptions();
 
     $("#homeLink").attr('href', getBaseUrl());
+    $("#newLink").attr('href', getBaseUrl() + "edit.html");
 
     var queryParams = getQueryParams();
 
