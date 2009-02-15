@@ -316,7 +316,7 @@ function linkify(str, parent) {
             else if (m[2] != null) {
                 linkifyAppendLink(parent,
                                   "TS" + m[2],
-                                  "http://www.thesession.org/tunes/display" + m[2]);
+                                  "http://www.thesession.org/tunes/display/" + m[2]);
             }
         }
     }
