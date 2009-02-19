@@ -239,6 +239,7 @@ function fillEdit(tune) {
     $("#editAka").val(tune.aka != null ? tune.aka : "");
     $("#editRhythm").val(tune.rhythm != null ? tune.rhythm : "reel");
     $("#editKey").val(tune.key != null ? tune.key : "");
+    $("#editStructure").val(tune.structure != null ? tune.structure : "");
     $("#editComposer").val(tune.composer != null ? tune.composer : "");
     $("#editRefs").val(tune.refs != null ? tune.refs : "");
     $("#editIncipit").val(tune.incipit != null ? tune.incipit : "");
@@ -259,6 +260,7 @@ function fetchEditData() {
         aka : $("#editAka").val(),
         rhythm : $("#editRhythm").val(),
         key : $("#editKey").val(),
+        structure : $("#editStructure").val(),
         composer : $("#editComposer").val(),
         refs : $("#editRefs").val(),
         incipit : $("#editIncipit").val(),
