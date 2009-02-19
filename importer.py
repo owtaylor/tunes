@@ -115,11 +115,14 @@ def read_tunes_from_file(filename):
                 parse_tune(line, defaults)
             else:
                 raise ParseError("Unrecognized line")
+        # With Python-2.4/2.5, str(e) fails if e has a unicode message -
+        # it always tries to use the ascii codec. Work around it with e.args[0]
+        # (e.message isn't available in Python-2.4)
         except ParseError, e:
-            print >>sys.stderr, "%s:%d: %s" % (filename, lineno, e)
+            print >>sys.stderr, "%s:%d: %s" % (filename, lineno, e.args[0])
             have_error = True
         except ValidationError, e:
-            print >>sys.stderr, "%s:%d: %s" % (filename, lineno, e)
+            print >>sys.stderr, "%s:%d: %s" % (filename, lineno, e.args[0])
             have_error = True
     f.close()
 
