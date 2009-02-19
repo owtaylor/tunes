@@ -996,3 +996,21 @@ function dialogCancelClicked() {
     $("#dialogDiv").hide();
     dialogUp = false;
 }
+
+function selectRandom() {
+    var rows = document.getElementById("tuneBody").childNodes;
+    var tuneRows = [];
+
+    var i;
+    for (i = 0; i < rows.length; i++) {
+        var row = rows[i];
+        if (row.tune && !row.filtered)
+            tuneRows.push(i);
+    }
+
+    if (tuneRows.length == 0)
+        return;
+
+    var randIndex = Math.floor(Math.random() * tuneRows.length);
+    selectRow(rows[tuneRows[randIndex]]);
+}
