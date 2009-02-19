@@ -21,4 +21,4 @@ create table Tune (
 );
 EOF
 
-./importer.py -o tunes.sqlite data-other data-jigs data-hornpipes
+./importer.py -o tunes.sqlite data-other data-jigs data-hornpipes data-reels
