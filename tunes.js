@@ -125,9 +125,46 @@ function refilter() {
     }
 }
 
+function getRowY(row) {
+    var parent = row;
+    var rowY = 0;
+    while (parent) {
+        rowY += parent.offsetTop;
+        parent = parent.offsetParent;
+    }
+
+    return rowY;
+}
+
+function scrollRowVisible(row) {
+    var rowY = getRowY(row);
+    var rowHeight = row.offsetHeight;
+
+    var visibleMin = document.getElementById("headerDiv").offsetHeight + window.scrollY;
+    var visibleMax = window.innerHeight + window.scrollY;
+
+    if (rowY < visibleMin) {
+        window.scrollTo(0, window.scrollY - (visibleMin - rowY));
+    } else if (rowY + rowHeight > visibleMax) {
+        window.scrollTo(0, window.scrollY + (rowY + rowHeight - visibleMax));
+    }
+}
+
+function centerRow(row) {
+    var rowY = getRowY(row);
+    var rowHeight = row.offsetHeight;
+
+    var visibleMin = document.getElementById("headerDiv").offsetHeight + window.scrollY;
+    var visibleMax = window.innerHeight + window.scrollY;
+
+    window.scrollTo(0, window.scrollY + ((rowY + rowHeight / 2) - (visibleMin + visibleMax) / 2));
+}
+
 function selectRow(row) {
     if (selectedRow == row)
         return;
+
+    scrollRowVisible(row);
 
     if (selectedRow) {
         $(selectedRow).removeClass("selected-row");
@@ -1012,5 +1049,6 @@ function selectRandom() {
         return;
 
     var randIndex = Math.floor(Math.random() * tuneRows.length);
+    centerRow(rows[tuneRows[randIndex]]);
     selectRow(rows[tuneRows[randIndex]]);
 }
