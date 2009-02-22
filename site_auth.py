@@ -65,6 +65,7 @@ def set_auth_cookie(cookiedb, username, pw):
 
     cookiedb['tunes_auth'] = make_auth(username)
     cookiedb['tunes_auth']['path'] = config.BASE_URL
+    cookiedb['tunes_auth']['max-age'] = 356 * 24 * 60 * 60 # One year
 
 def check_auth_cookie(cookiedb):
     if not 'tunes_auth' in cookiedb:
