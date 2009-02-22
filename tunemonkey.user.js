@@ -258,15 +258,11 @@ function startTheSessionPage(tsId) {
     }
 
     if (rhythm) {
-        tuneParams['rythm'] = rhythm.toLowerCase();
+        tuneParams['rhythm'] = rhythm.toLowerCase();
     }
 
     if (composer) {
         tuneParams['composer'] = composer.toLowerCase();
-    }
-
-    if (rhythm) {
-        tuneParams['rythm'] = rhythm.toLowerCase();
     }
 
     createTuneDiv(tuneParams);
