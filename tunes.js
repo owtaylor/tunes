@@ -164,7 +164,8 @@ function selectRow(row) {
     if (selectedRow == row)
         return;
 
-    scrollRowVisible(row);
+    if (row)
+        scrollRowVisible(row);
 
     if (selectedRow) {
         $(selectedRow).removeClass("selected-row");
