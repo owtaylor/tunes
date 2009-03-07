@@ -26,7 +26,8 @@ def make_auth(username, t=None):
     if t == None:
         t = time.time()
     message = "%s,%d" % (username, t)
-    hm = hmac.new(get_site_secret(), message, sha.new)
+    # We pass in the module instead of sha.new for compat with Python 2.4
+    hm = hmac.new(get_site_secret(), message, sha)
     return message + "," +  password_utils.encode_160(hm.digest())
 
 def check_auth(auth):
