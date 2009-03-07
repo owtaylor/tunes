@@ -8,7 +8,6 @@ import Cookie
 import os
 import sys
 import simplejson as json
-import sqlite3 as sqlite
 
 import config
 from validation import validate_dict, ValidationError
@@ -37,8 +36,6 @@ try:
     username = site_auth.check_auth_cookie(cookiedb)
 except site_auth.AuthError:
     raise_error(403, "Not logged in")
-
-conn = sqlite.connect(config.TUNES_DB)
 
 form = cgi.FieldStorage()
 

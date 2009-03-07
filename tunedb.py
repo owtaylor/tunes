@@ -1,6 +1,9 @@
 import config
 import re
-import sqlite3 as sqlite
+try:
+    import sqlite3 as sqlite
+except:
+    from pysqlite2 import dbapi2 as sqlite
 
 class TuneDB:
     def __init__(self):

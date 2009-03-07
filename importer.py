@@ -1,7 +1,6 @@
 #!/usr/bin/python
 
 import simplejson as json
-import sqlite3 as sqlite
 import re
 import sys
 

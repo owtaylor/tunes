@@ -6,7 +6,6 @@ import cgitb;
 import os
 import re
 import simplejson as json
-import sqlite3 as sqlite
 import sys
 import time
 
