@@ -70,7 +70,7 @@ ORDER BY id""", values);
     def query_tune(self, tune_id):
         rows = [x for x in self.query_tunes(tune_id)]
         if len(rows) < 1:
-            raise RuntimeError("No such tune ID")
+            raise KeyError("No such tune ID %s" % tune_id)
         if len(rows) > 1:
             raise RuntimeError("Too many rows in result")
         return rows[0]
