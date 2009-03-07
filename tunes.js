@@ -636,7 +636,7 @@ function getUsername() {
     if (v == "")
         return null;
 
-    var cookies = v.split("\s*;\s*");
+    var cookies = v.split(/\s*;\s*/);
     var i;
     for (i = 0; i < cookies.length; i++) {
         var m = cookies[i].match(/^tunes_auth\s*=\s*([a-zA-Z_.]+),/);
