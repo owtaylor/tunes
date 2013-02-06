@@ -39,12 +39,17 @@ except site_auth.AuthError:
 
 form = cgi.FieldStorage()
 
+if not 'charset' in form.type_options or form.type_options['charset'].lower() not in ('utf8', 'utf-8'):
+    raise_error(400, 'Only UTF-8 encoded form submissions are accepted')
+
 def get_field(fieldname):
     res = form.getfirst(fieldname, "").strip()
     if res == "":
         return None
-    else:
+    elif isinstance(res, unicode):
         return res
+    else:
+        return res.decode('UTF-8')
 
 action = get_field('action');
 if action == None:
