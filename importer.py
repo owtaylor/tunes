@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 
 import json
 import re
@@ -99,10 +99,9 @@ def parse_tune(s, defaults):
 
 def read_tunes_from_file(filename):
     defaults = {}
-    f = open(filename)
+    f = open(filename, encoding="UTF-8")
     lineno = 0
     for line in f:
-        line = line.decode('UTF-8')
         lineno += 1
         line = line.strip()
         try:
@@ -117,49 +116,28 @@ def read_tunes_from_file(filename):
         # With Python-2.4/2.5, str(e) fails if e has a unicode message -
         # it always tries to use the ascii codec. Work around it with e.args[0]
         # (e.message isn't available in Python-2.4)
-        except ParseError, e:
-            print >>sys.stderr, "%s:%d: %s" % (filename, lineno, e.args[0])
+        except ParseError as e:
+            print("%s:%d: %s" % (filename, lineno, e.args[0]), file=sys.stderr)
             have_error = True
-        except ValidationError, e:
-            print >>sys.stderr, "%s:%d: %s" % (filename, lineno, e.args[0])
+        except ValidationError as e:
+            print("%s:%d: %s" % (filename, lineno, e.args[0]), file=sys.stderr)
             have_error = True
     f.close()
 
 # This sorts into "import order", so that the arbitrary integer IDs are a little
 # more meaningful
-def compare_tunes(a, b):
+def tune_key(a):
     if 'since' in a:
-        if not 'since' in b:
-            return -1
         sa = a['since']
-        sb = b['since']
         if sa[0] == '<':
             sa = int(sa[1:]) - 0.5
         else:
             sa = int(sa)
-        if sb[0] == '<':
-            sb = int(sb[1:]) - 0.5
-        else:
-            sb = int(sb)
+    else:
+        sa = 9999
 
-        if sa != sb:
-            return cmp(sa, sb)
-    elif 'since' in b:
-        return 1
+    return (sa, a['rhythm'].lower(), a['name'].lower())
 
-    rhythma = a['rhythm'].lower()
-    rhythmb = b['rhythm'].lower()
-
-    if rhythma != rhythmb:
-        return cmp(rhythma,rhythmb)
-
-    namea = a['name'].lower()
-    nameb = b['name'].lower()
-
-    if namea != nameb:
-        return cmp(namea,nameb)
-
-    return 0
 
 output = None
 i = 1
@@ -175,7 +153,7 @@ while i < len(sys.argv):
 if have_error:
     sys.exit(1)
 
-tunes.sort(compare_tunes)
+tunes.sort(key=tune_key)
 
 if output != None:
     db = TuneDB()
@@ -183,4 +161,4 @@ if output != None:
     db.close()
 else:
     for tune in tunes:
-        print json.dumps(tune)
+        print(json.dumps(tune))

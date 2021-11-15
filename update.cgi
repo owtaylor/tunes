@@ -1,10 +1,10 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 
 from tunedb import TuneDB
 
 import cgi
 import cgitb
-import Cookie
+import http.cookies
 import json
 import os
 import sys
@@ -22,13 +22,13 @@ STATUS_TEXTS = {
 };
 
 def raise_error(status, message):
-    print "Status: %d %s" % (status, STATUS_TEXTS[status])
-    print "Content-Type: text/plain"
-    print
-    print message
+    print("Status: %d %s" % (status, STATUS_TEXTS[status]))
+    print("Content-Type: text/plain")
+    print()
+    print(message)
     sys.exit(1)
 
-cookiedb = Cookie.BaseCookie()
+cookiedb = http.cookies.BaseCookie()
 if 'HTTP_COOKIE' in os.environ:
     cookiedb.load(os.environ['HTTP_COOKIE'])
 
@@ -46,7 +46,7 @@ def get_field(fieldname):
     res = form.getfirst(fieldname, "").strip()
     if res == "":
         return None
-    elif isinstance(res, unicode):
+    elif isinstance(res, str):
         return res
     else:
         return res.decode('UTF-8')
@@ -65,14 +65,14 @@ if action == 'delete':
 
     try:
         db.delete_tune(tune_id)
-    except Exception, e:
+    except Exception as e:
         import traceback
         traceback.print_exc(None, sys.stderr)
         raise_error(400, str(e))
 
-    print "Content-Type: text/plain"
-    print
-    print tune_id
+    print("Content-Type: text/plain")
+    print()
+    print(tune_id)
 elif action == 'update':
     values = {
         'id' : get_field('id'),
@@ -92,7 +92,7 @@ elif action == 'update':
     };
 
     to_delete = []
-    for k, v in values.iteritems():
+    for k, v in values.items():
         if v is None:
             to_delete.append(k)
 
@@ -101,7 +101,7 @@ elif action == 'update':
 
     try:
         validate_dict(values)
-    except ValidationError, e:
+    except ValidationError as e:
         raise_error(400, str(e))
 
     # As a courtesy, we don't consider this validation, but just fix the maxlevel
@@ -114,15 +114,15 @@ elif action == 'update':
             db.update_tune(tune_id, values)
         else:
             tune_id = db.insert_tune(values)
-    except Exception, e:
+    except Exception as e:
         import traceback
         traceback.print_exc(None, sys.stderr)
         raise_error(400, str(e))
 
     new_values = db.query_tune(tune_id)
 
-    print "Content-Type: text/plain"
-    print
+    print("Content-Type: text/plain")
+    print()
     json.dump(new_values, sys.stdout);
 
 db.close()

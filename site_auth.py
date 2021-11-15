@@ -1,10 +1,10 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 
 import config
+import hashlib
 import hmac
 import password_utils
 import re
-import sha
 import time
 
 class AuthError(Exception):
@@ -26,9 +26,8 @@ def make_auth(username, t=None):
     if t == None:
         t = time.time()
     message = "%s,%d" % (username, t)
-    # We pass in the module instead of sha.new for compat with Python 2.4
-    hm = hmac.new(get_site_secret(), message, sha)
-    return message + "," +  password_utils.encode_160(hm.digest())
+    hm = hmac.new(get_site_secret(), message.encode("UTF-8"), hashlib.sha256)
+    return message + "," +  password_utils.encode_256(hm.digest())
 
 def check_auth(auth):
     auth = auth.strip()
@@ -61,7 +60,7 @@ def set_auth_cookie(cookiedb, username, pw):
 
     try:
         password_utils.check_password(crypted, pw)
-    except password_utils.PasswordError, e:
+    except password_utils.PasswordError as e:
         raise AuthError(str(e))
 
     cookiedb['tunes_auth'] = make_auth(username)
@@ -75,7 +74,7 @@ def check_auth_cookie(cookiedb):
     return check_auth(cookiedb['tunes_auth'].value)
 
 if __name__ == '__main__':
-    import Cookie
+    import http.cookies
 
     TEST_PASSWORD = "asdfa"
 
@@ -84,7 +83,7 @@ if __name__ == '__main__':
     auth = make_auth(config.ADMIN_USERNAME)
     assert check_auth(auth) == config.ADMIN_USERNAME
 
-    cookiedb = Cookie.BaseCookie()
+    cookiedb = http.cookies.BaseCookie()
     set_auth_cookie(cookiedb, config.ADMIN_USERNAME, TEST_PASSWORD)
 
     assert check_auth_cookie(cookiedb) == config.ADMIN_USERNAME
@@ -93,6 +92,6 @@ if __name__ == '__main__':
     failed = False
     try:
         check_auth_cookie(cookiedb)
-    except AuthError, e:
+    except AuthError as e:
         failed = True
     assert failed

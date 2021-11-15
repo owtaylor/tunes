@@ -1,7 +1,7 @@
 FROM ubi8:latest
 
 RUN yum -y update && \
-    yum -y install httpd python2 sqlite
+    yum -y install httpd python39 sqlite
 
 COPY tunes.conf /etc/httpd/conf.d/
 

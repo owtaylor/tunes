@@ -1,8 +1,8 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 
 import cgi
 import cgitb
-import Cookie
+import http.cookies
 import os
 import sys
 
@@ -12,7 +12,7 @@ import site_auth
 # Turn on verbose exception handling
 cgitb.enable()
 
-cookiedb = Cookie.BaseCookie()
+cookiedb = http.cookies.BaseCookie()
 if 'HTTP_COOKIE' in os.environ:
     cookiedb.load(os.environ['HTTP_COOKIE'])
 
@@ -33,25 +33,25 @@ try:
         raise site_auth.AuthError("Password not provided")
 
     site_auth.set_auth_cookie(cookiedb, username, password)
-except site_auth.AuthError, e:
-    print "Status: 403 Forbidden"
-    print "Content-Type: text/html"
-    print
-    print "<head><title>Owen Taylor's Tunebook</title></head>"
-    print "<body>"
-    print "<h1>Error logging in</h1>"
-    print "<p>%s</p>" % cgi.escape(str(e))
-    print "</body>"
+except site_auth.AuthError as e:
+    print("Status: 403 Forbidden")
+    print("Content-Type: text/html")
+    print()
+    print("<head><title>Owen Taylor's Tunebook</title></head>")
+    print("<body>")
+    print("<h1>Error logging in</h1>")
+    print("<p>%s</p>" % cgi.escape(str(e)))
+    print("</body>")
     sys.exit(1)
 
-next = form.getfirst("next", "").strip();
+next_loc = form.getfirst("next", "").strip();
 
-print "Status: 303 See Other"
-print "Content-Type: text/html"
-print "Location: " + config.BASE_URL + next;
-print cookiedb.output()
-print
-print "<head><title>Owen Taylor's Tunebook</title></head>"
-print "<body>"
-print "<p>Successfully logged in as %s</p>" % cgi.escape(username)
-print "</body>"
+print("Status: 303 See Other")
+print("Content-Type: text/html")
+print("Location: " + config.BASE_URL + next_loc);
+print(cookiedb.output())
+print()
+print("<head><title>Owen Taylor's Tunebook</title></head>")
+print("<body>")
+print("<p>Successfully logged in as %s</p>" % cgi.escape(username))
+print("</body>")

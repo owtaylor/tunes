@@ -84,7 +84,7 @@ def validate_mandatory(d):
             raise ValidationError("Missing mandatory key '%s'" % k)
 
 def validate_dict(d):
-    for (k,v) in d.iteritems():
+    for (k,v) in d.items():
         validate_key_value(k,v)
 
     validate_mandatory(d)

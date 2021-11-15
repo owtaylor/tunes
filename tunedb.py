@@ -51,7 +51,7 @@ ORDER BY id""", values);
                       'structure' : structure,
                       'study' : study};
 
-            for k in values.keys():
+            for k in list(values.keys()):
                 if values[k] is None:
                     del values[k]
 

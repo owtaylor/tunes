@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 
 import calendar
 import cgi
@@ -80,16 +80,16 @@ if s.st_mtime > last_modified:
 if 'HTTP_IF_MODIFIED_SINCE' in os.environ:
     if_modified_since = parse_http_date(os.environ['HTTP_IF_MODIFIED_SINCE'])
     if if_modified_since != None and if_modified_since >= last_modified:
-        print "Last-Modified: " + format_http_date(last_modified)
-        print "Status: 304 Not Modified"
-        print
+        print("Last-Modified: " + format_http_date(last_modified))
+        print("Status: 304 Not Modified")
+        print()
         sys.exit(0)
 
 db = TuneDB()
 
-print "Content-Type: text/plain"
-print "Last-Modified: " + format_http_date(last_modified)
-print
+print("Content-Type: text/plain")
+print("Last-Modified: " + format_http_date(last_modified))
+print()
 
 do_query(db, ref=ref, tune_id=tune_id)
 db.close()
