@@ -1,0 +1,4 @@
+import sys
+
+sys.path[0:0] = [ '/srv/tunes-data' ]
+from config_real import *
