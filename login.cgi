@@ -1,16 +1,12 @@
 #!/usr/bin/python3
 
 import cgi
-import cgitb
 import http.cookies
 import os
 import sys
 
 import config
 import site_auth
-
-# Turn on verbose exception handling
-cgitb.enable()
 
 cookiedb = http.cookies.BaseCookie()
 if 'HTTP_COOKIE' in os.environ:

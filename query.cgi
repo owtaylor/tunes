@@ -2,7 +2,6 @@
 
 import calendar
 import cgi
-import cgitb;
 import json
 import os
 import re
@@ -50,9 +49,6 @@ def parse_http_date(datestr):
         return None
 
     return calendar.timegm(dt)
-
-# Turn on verbose exception handling
-cgitb.enable()
 
 form = cgi.FieldStorage()
 

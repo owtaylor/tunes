@@ -3,7 +3,6 @@
 from tunedb import TuneDB
 
 import cgi
-import cgitb
 import http.cookies
 import json
 import os
@@ -12,9 +11,6 @@ import sys
 import config
 from validation import validate_dict, ValidationError
 import site_auth
-
-# Turn on verbose exception handling
-cgitb.enable()
 
 STATUS_TEXTS = {
     400 : "Bad Request",
