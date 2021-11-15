@@ -1,11 +1,11 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 
 import calendar
 import cgi
 import cgitb;
+import json
 import os
 import re
-import simplejson as json
 import sys
 import time
 

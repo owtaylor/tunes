@@ -1,6 +1,6 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 
-import simplejson as json
+import json
 import re
 import sys
 

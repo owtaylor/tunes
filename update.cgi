@@ -1,13 +1,13 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 
 from tunedb import TuneDB
 
 import cgi
 import cgitb
 import Cookie
+import json
 import os
 import sys
-import simplejson as json
 
 import config
 from validation import validate_dict, ValidationError
