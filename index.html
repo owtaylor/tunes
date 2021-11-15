@@ -1,7 +1,9 @@
+<!DOCTYPE html>
 <html>
   <head>
     <title>Owen Taylor's Tunebook</title>
     <link rel="stylesheet" href="tunes.css" type="text/css"></link>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"></meta>
     <script src="jquery.min.js" type="text/javascript"></script>
     <script src="tunes.js" type="text/javascript"></script>
     <script type="text/javascript">
@@ -9,20 +11,28 @@
     </script>
   </head>
   <body>
+    <div id="mediaTypeDiv">Foo</div>
     <div id="headerDiv">
       <div id="headerContents">
 	<div id="userDiv">
+	  <input id="newActionUserDiv" type="button" value="New" onclick="actionNew();"></input>
 	  <div id="loginDiv">
 	    <a href="login.html">Login</a>
 	  </div>
 	  <div id="logoutDiv" style="display:none;">
-	    Logged in as <span id="userSpan"></span><br/>
-	    <a href="javascript:void(0)" onclick="logout();">Logout</a>
+	    Logged in as <span id="userSpan"></span>
+	    (<a href="javascript:void(0)" onclick="logout();">Logout</a>)
 	  </div>
+          <div style="clear: both"></div>
 	</div>
 	<div id="filterDiv">
-	  <input id="filterInput"/>
-	  <select id="filterRhythm"></select><br/>
+          <div id="filterTop">
+	    <select id="filterRhythm"></select>
+            <div id="filterInputDiv">
+	      <input id="filterInput"/>
+            </div>
+            <div style="clear: both"></div>
+          </div>
 	  <input type="checkbox" id="studyOnly">Study Tunes</input>
 	  <a href="javascript:void(0)" onclick="selectRandom();">Random Tune</a>
 	</div>
@@ -78,12 +88,20 @@
 	<div class="edit-item"><span class="edit-label">Notes</span><br/><textarea id="editNotes"></textarea></div>
       </div>
 
-      <div id="tuneActions">
-	<input id="editAction" type="button" value="Edit" onclick="actionEdit();" disabled="1"></input>
-	<input id="deleteAction" type="button" value="Delete" onclick="actionDelete();" disabled="1"></input>
-	<input id="newAction" type="button" value="New" onclick="actionNew();"></input>
-	<input id="cancelAction" type="button" value="Cancel" onclick="actionCancel();" style="display:none"></input>
-	<input id="saveAction" type="button" value="Save" onclick="actionSave();" style="display:none"></input>
+      <div id="sideBarButtons">
+        <div id="tuneActions">
+	  <input id="editAction" type="button" value="Edit" onclick="actionEdit();" disabled="1"></input>
+	  <input id="deleteAction" type="button" value="Delete" onclick="actionDelete();" disabled="1"></input>
+	  <input id="newAction" type="button" value="New" onclick="actionNew();"></input>
+	  <input id="cancelAction" type="button" value="Cancel" onclick="actionCancel();" style="display:none"></input>
+	  <input id="saveAction" type="button" value="Save" onclick="actionSave();" style="display:none"></input>
+        </div>
+        <div id="navActions">
+	  <input id="prevAction" type="button" value="&#x21E6;" onclick="actionPrev();"></input>
+	  <input id="upAction" type="button" value="&#x21E7;" onclick="actionUp();"></input>
+	  <input id="nextAction" type="button" value="&#x21E8;" onclick="actionNext();"></input>
+        </div>
+        <div style="clear: both"></div>
       </div>
     </div>
     <div id="tunesDiv">

@@ -1,16 +1,22 @@
 /* -*- mode: js2; js2-basic-offset: 4; indent-tabs-mode: nil -*- */
 
+var mobile = false;
 var page;
 var allTunes;
 var filterText;
 var rhythmFilter;
 var studyOnly;
 var selectedRow;
+var currentObject;
+var upIsBack = false;
 var inEdit = false;
 var editId = null;
 var dialogUp = false;
+var randomPosition = -1;
+var randomRows = [];
 
 var COLUMN_COUNT = 5;
+var MOBILE_COLUMN_COUNT = 3;
 var BASE_TITLE = "Owen Taylor's Tunebook";
 
 RHYTHMS = {
@@ -125,6 +131,19 @@ function refilter() {
     }
 }
 
+function findRow(tuneId) {
+    tuneId = parseInt(tuneId);
+
+    var rows = document.getElementById("tuneBody").childNodes;
+    for (var i = 0; i < rows.length; i++) {
+        var row = rows[i];
+        if (row.tune && row.tune.id == tuneId)
+            return row;
+    }
+
+    return null;
+}
+
 function getRowY(row) {
     var parent = row;
     var rowY = 0;
@@ -160,31 +179,94 @@ function centerRow(row) {
     window.scrollTo(0, window.scrollY + ((rowY + rowHeight / 2) - (visibleMin + visibleMax) / 2));
 }
 
-function selectRow(row) {
-    if (selectedRow == row)
+function setCurrentObject(obj, changeHistory) {
+    if (changeHistory === undefined)
+        changeHistory = true;
+
+    if (!mobile)
+        changeHistory = false;
+
+    if (currentObject == obj)
         return;
 
-    if (row)
-        scrollRowVisible(row);
+    var hadObject = !!currentObject;
+
+    if (changeHistory && hadObject && !obj && upIsBack) {
+        history.back();
+        return;
+    }
+
+    if (!mobile) {
+        if (obj && obj != 'new')
+            scrollRowVisible(obj);
+
+        if (selectedRow)
+            $(selectedRow).removeClass("selected-row");
+    }
+
+    currentObject = obj;
+    if (currentObject == 'new')
+        selectedRow = null;
+    else
+        selectedRow = obj;
+
+    if (!currentObject) {
+        if (mobile)
+            document.title = "Owen Taylor's Tunebook";
+
+        if (hadObject) {
+            /* If we go up, not via history.back() we are going *forward* */
+            if (changeHistory)
+                history.pushState(null, null, '?');
+
+            upIsBack = false;
+            randomRows = [];
+            randomPosition = -1;
+
+            $("#editAction").attr("disabled", 1);
+            $("#deleteAction").attr("disabled", 1);
+
+            $("#sideDiv").hide();
+            $("#headerDiv").show();
+            $("#tunesDiv").show();
+        }
+
+        return;
+    }
+
+    var id = (obj == 'new') ? 'new' : obj.tune.id;
+
+    if (hadObject) {
+        if (changeHistory)
+            history.replaceState(id, null, '?tune=' + id);
+    } else {
+        $("#editAction").removeAttr("disabled");
+        $("#deleteAction").removeAttr("disabled");
+
+        if (mobile) {
+            $("#sideDiv").show();
+            $("#headerDiv").hide();
+            $("#tunesDiv").hide();
+
+            if (changeHistory) {
+                history.pushState(id, null, '?tune=' + id);
+                upIsBack = true;
+            }
+        }
+    }
+
+    if (mobile) {
+        var name = (obj == 'new') ? 'New' : obj.tune.name;
+        document.title = name + " - Owen Taylor's Tunebook";
+    }
 
     if (selectedRow) {
-        $(selectedRow).removeClass("selected-row");
+        if (!mobile)
+            $(selectedRow).addClass("selected-row");
+        fillInfo(selectedRow.tune);
     }
-
-    selectedRow = row;
-
-    if (!selectedRow) {
-        $("#editAction").attr("disabled", 1);
-        $("#deleteAction").attr("disabled", 1);
-        return;
-    }
-
-    $("#editAction").removeAttr("disabled");
-    $("#deleteAction").removeAttr("disabled");
-
-    $(selectedRow).addClass("selected-row");
-    fillInfo(row.tune);
 }
+
 
 function fillInfo(tune) {
     var infoDiv = $("#infoDiv");
@@ -397,21 +479,26 @@ function createTuneRow(tune) {
     if (tune.aka != null)
         name += " (" + tune.aka + ")";
 
-    td = document.createElement("td");
-    if (tune.refs != null)
-        linkify(tune.refs, td);
-    tr.appendChild(td);
+    if (!mobile) {
+        td = document.createElement("td");
+        if (tune.refs != null)
+            linkify(tune.refs, td);
+        tr.appendChild(td);
+    }
 
+    var a;
     td = document.createElement("td");
     td.appendChild(document.createTextNode(name));
     if (tune.study == 1)
         td.className = "study-name";
     tr.appendChild(td);
 
-    td = document.createElement("td");
-    if (tune.since != null)
-        td.appendChild(document.createTextNode(tune.since));
-    tr.appendChild(td);
+    if (!mobile) {
+        td = document.createElement("td");
+        if (tune.since != null)
+            td.appendChild(document.createTextNode(tune.since));
+        tr.appendChild(td);
+    }
 
     td = document.createElement("td");
     td.className = "tune-flags";
@@ -426,7 +513,7 @@ function createTuneRow(tune) {
 
     $(tr).click(function(event) {
         if (!inEdit) {
-            selectRow(tr);
+            setCurrentObject(tr);
         }
 
         // Keeping the focus on an input area is necessary so that
@@ -436,7 +523,7 @@ function createTuneRow(tune) {
 
     $(tr).dblclick(function(event) {
         if (!inEdit) {
-            selectRow(tr);
+            setCurrentObject(tr);
             actionEdit(tr);
         } else {
             $("#filterInput").focus();
@@ -459,6 +546,7 @@ function updateTuneElements() {
 
     var rhythm;
     var key;
+    var tr;
 
     // Make a copy of the old rows, since deleting children may confuse things
     // element.childNodes() doesn't support slice() which we could use to
@@ -494,7 +582,6 @@ function updateTuneElements() {
             }
         }
 
-        var tr;
         if (tune.rhythm != rhythm || tune.key != key) {
             // Need a header
 
@@ -515,7 +602,7 @@ function updateTuneElements() {
 
                 th = document.createElement("th");
                 th.appendChild(document.createTextNode(RHYTHMS[tune.rhythm] + " - " + tune.key));
-                th.colSpan = COLUMN_COUNT;
+                th.colSpan = mobile ? MOBILE_COLUMN_COUNT : COLUMN_COUNT;
                 tr.appendChild(th);
                 tr.rhythm = rhythm;
                 tr.key = key;
@@ -555,7 +642,7 @@ function updateTuneElements() {
             }
 
             if (selectedRow && selectedRow.tune.id == tune.id) {
-                selectRow(tr);
+                setCurrentObject(tr);
             }
         }
     }
@@ -700,7 +787,7 @@ function selectNext() {
     var node = selectedRow.nextSibling;
     while (node) {
         if (node.tune != null && !node.filtered) {
-            selectRow(node);
+            setCurrentObject(node);
             return true;
         }
         node = node.nextSibling;
@@ -716,7 +803,7 @@ function selectPrevious() {
     var node = selectedRow.previousSibling;
     while (node) {
         if (node.tune != null && !node.filtered) {
-            selectRow(node);
+            setCurrentObject(node);
             return true;
         }
         node = node.previousSibling;
@@ -725,8 +812,53 @@ function selectPrevious() {
     return false;
 }
 
+function onpopstate(event) {
+    if (event.state == null) {
+        setCurrentObject(null, false);
+    } else if (event.state == 'new') {
+        actionNew(false);
+    } else {
+        var row = findRow(event.state);
+        if (row) {
+            setCurrentObject(row, false);
+            return;
+        }
+    }
+}
+
+function selectInitial() {
+    var queryParams = getQueryParams();
+    if ('tune' in queryParams) {
+        if (queryParams['tune'] == 'new') {
+            actionNew(false);
+            history.replaceState('new', null, '?tune=new');
+        } else {
+            var row = findRow(queryParams['tune']);
+            if (row) {
+                setCurrentObject(row, false);
+
+                if (mobile) {
+                    // Get the right state set in the history
+                    history.replaceState(row.tune.id, null, '?tune=' + row.tune.id);
+                }
+            }
+        }
+    }
+}
+
 function init() {
     page = "index";
+
+    var mediaTypeDiv = document.getElementById("mediaTypeDiv");
+    if (window.getComputedStyle(mediaTypeDiv).fontWeight == 'bold' ||
+        window.getComputedStyle(mediaTypeDiv).fontWeight == 700) {
+        mobile = true;
+        $("#sideDiv").hide();
+        $("#tuneRefsCol").remove();
+        $("#tuneSinceCol").remove();
+
+        window.addEventListener('popstate', onpopstate, false);
+    }
 
     $.getJSON("query.cgi",
         function(data) {
@@ -734,6 +866,7 @@ function init() {
             allTunes = data;
             updateTuneElements();
             filterChanged();
+            selectInitial();
         });
 
     createRhythmOptions();
@@ -927,10 +1060,41 @@ function infoMode() {
     $("#editDiv").hide();
     $("#editAction").show();
     $("#deleteAction").show();
-    $("#newAction").show();
+    if (!mobile)
+        $("#newAction").show();
     $("#cancelAction").hide();
     $("#saveAction").hide();
     $("#filterInput").focus();
+}
+
+function actionPrev() {
+    if (randomPosition  != -1) {
+        if (randomPosition > 0) {
+            randomPosition--;
+            setCurrentObject(randomRows[randomPosition]);
+        } else {
+            selectRandom(type='prev');
+        }
+    } else {
+        selectPrevious();
+    }
+}
+
+function actionUp() {
+    setCurrentObject(null);
+}
+
+function actionNext() {
+    if (randomPosition != -1) {
+        if (randomPosition < randomRows.length - 1) {
+            randomPosition++;
+            setCurrentObject(randomRows[randomPosition]);
+        } else {
+            selectRandom(type='next');
+        }
+    } else {
+        selectNext();
+    }
 }
 
 function actionEdit() {
@@ -953,9 +1117,12 @@ function actionDelete() {
     dialogUp = true;
 }
 
-function actionNew() {
+function actionNew(changeHistory) {
+    if (changeHistory === undefined)
+        changeHistory = true;
+
     fillEdit({});
-    selectRow(null);
+    setCurrentObject('new', changeHistory);
     inEdit = true;
     editMode();
 }
@@ -989,6 +1156,13 @@ function actionSave() {
                 inEdit = false;
                 updateTunes([tune]);
                 infoMode();
+                if (currentObject == 'new' && mobile) {
+                    var newRow = findRow(tune.id);
+                    if (newRow)
+                        setCurrentObject(newRow);
+                    else
+                        setCurrentObject(null);
+                }
             }
         },
         error: function(request, textStatus, errorThrown) {
@@ -1023,7 +1197,7 @@ function dialogOKClicked() {
             if (selectedRow && selectedRow.tune.id == deletedId) {
                 // Try to select some other row
                 if (!selectNext() && !selectPrevious())
-                    selectRow(null);
+                    setCurrentObject(null);
             }
 
             deleteTunes([deletedId]);
@@ -1039,7 +1213,7 @@ function dialogCancelClicked() {
     dialogUp = false;
 }
 
-function selectRandom() {
+function selectRandom(type) {
     var rows = document.getElementById("tuneBody").childNodes;
     var tuneRows = [];
 
@@ -1053,7 +1227,22 @@ function selectRandom() {
     if (tuneRows.length == 0)
         return;
 
+
     var randIndex = Math.floor(Math.random() * tuneRows.length);
-    centerRow(rows[tuneRows[randIndex]]);
-    selectRow(rows[tuneRows[randIndex]]);
+    var randomRow = rows[tuneRows[randIndex]];
+
+    centerRow(randomRow);
+
+    randomPosition = 0;
+    setCurrentObject(randomRow);
+
+    if (mobile) {
+        if (type == 'prev') {
+            randomRows.unshift(randomRow);
+            randomPosition = 0;
+        } else {
+            randomRows.push(randomRow);
+            randomPosition = randomRows.length - 1;
+        }
+    }
 }
