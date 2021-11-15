@@ -964,12 +964,15 @@ function actionCancel() {
     infoMode();
     editId = null;
     inEdit = false;
+    if (currentObject == 'new')
+        setCurrentObject(null);
 }
 
 function actionSave() {
     $.ajax({
         url: "update.cgi",
         type: "POST",
+        contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
         data: fetchEditData(),
         dataType: "json",
         success: function(tune, status) {
@@ -1010,6 +1013,7 @@ function dialogOKClicked() {
     $.ajax({
         url: "update.cgi",
         type: "POST",
+        contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
         data: {
             action: 'delete',
             id: deletedId
