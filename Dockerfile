@@ -13,7 +13,7 @@ RUN sed -i \
     -e "s|^ *CustomLog .*|CustomLog /dev/stdout combined|" \
     /etc/httpd/conf/httpd.conf
 
-ENV TUNES_CONFIG=/srv/tunes/config.yaml
+ENV TUNES_CONFIG=/srv/tunes-data/config.yaml
 
 ADD . /srv/tunes
 WORKDIR /srv/tunes
