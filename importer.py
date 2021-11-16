@@ -10,12 +10,14 @@ from validation import ValidationError, validate_key_value, validate_mandatory
 have_error = False
 tunes = []
 
-KEY_START = "(?:$|(?:,\s*|\s+)(?:(?:ng|ts|(?:hn[a-z]+))\d+|[a-z]+:))"
+KEY_START = r"(?:$|(?:,\s*|\s+)(?:(?:ng|ts|(?:hn[a-z]+))\d+|[a-z]+:))"
+
 
 def compile_re(s):
     return re.compile(s % {
-            'key_start' : KEY_START
+            'key_start': KEY_START
             }, re.VERBOSE)
+
 
 TUNE_SPEC = compile_re(r"""
 ([*+~,x])\s+
@@ -35,15 +37,17 @@ notes:\s*(.*?)\s*$
 
 """)
 
+
 class ParseError(RuntimeError):
     pass
 
+
 LEVELS = {
-    '*' : 1,
-    '+' : 2,
-    '~' : 3,
-    ',' : 4,
-    'x' : 5
+    '*': 1,
+    '+': 2,
+    '~': 3,
+    ',': 4,
+    'x': 5
 }
 
 
@@ -51,28 +55,31 @@ def iter_keys(s):
     pos = 0
     while pos < len(s):
         m = KEY_SPEC.match(s, pos)
-        if m == None:
-            raise ParseError("Can't parse key at: %s"  % (s[pos:],))
-        if m.group(1) != None:
-            k,v = ('notes', m.group(1))
-        elif m.group(2) != None:
-            k,v = (m.group(2), m.group(3))
+        if not m:
+            raise ParseError("Can't parse key at: %s" % (s[pos:],))
+        if m.group(1) is not None:
+            k, v = ('notes', m.group(1))
+        elif m.group(2) is not None:
+            k, v = (m.group(2), m.group(3))
         else:
-            k,v = ('refs', m.group(4))
+            k, v = ('refs', m.group(4))
 
-        validate_key_value(k, v);
+        validate_key_value(k, v)
 
-        yield k,v
+        yield k, v
 
         pos = m.end()
 
+
 def update_defaults(s, defaults):
-    for (k,v) in iter_keys(s):
+    for (k, v) in iter_keys(s):
         defaults[k] = v
+
 
 def validate_name(title):
     if re.search(r"\Waka", title, re.IGNORECASE):
         raise ParseError("title '%s' contains aka" % (title,))
+
 
 def parse_tune(s, defaults):
     m = TUNE_SPEC.match(s)
@@ -82,7 +89,7 @@ def parse_tune(s, defaults):
     keys = dict(defaults)
     keys['name'] = m.group(2)
     keys['level'] = LEVELS[m.group(1)]
-    for (k,v) in iter_keys(m.group(3)):
+    for (k, v) in iter_keys(m.group(3)):
         if k == 'refs':
             if 'refs' in keys:
                 keys['refs'] += ' ' + v
@@ -90,14 +97,17 @@ def parse_tune(s, defaults):
                 keys['refs'] = v
         else:
             if k in keys:
-                raise ValidationError("duplicate key '%s'", key)
+                raise ValidationError("duplicate key '%s'", k)
             else:
                 keys[k] = v
 
-    validate_mandatory(keys);
+    validate_mandatory(keys)
     tunes.append(keys)
 
+
 def read_tunes_from_file(filename):
+    global have_error
+
     defaults = {}
     f = open(filename, encoding="UTF-8")
     lineno = 0
@@ -123,6 +133,7 @@ def read_tunes_from_file(filename):
             print("%s:%d: %s" % (filename, lineno, e.args[0]), file=sys.stderr)
             have_error = True
     f.close()
+
 
 # This sorts into "import order", so that the arbitrary integer IDs are a little
 # more meaningful
@@ -155,7 +166,7 @@ if have_error:
 
 tunes.sort(key=tune_key)
 
-if output != None:
+if output is not None:
     db = TuneDB()
     db.insert_tunes(tunes)
     db.close()

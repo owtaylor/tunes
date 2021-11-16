@@ -40,11 +40,11 @@ except site_auth.AuthError as e:
     print("</body>")
     sys.exit(1)
 
-next_loc = form.getfirst("next", "").strip();
+next_loc = form.getfirst("next", "").strip()
 
 print("Status: 303 See Other")
 print("Content-Type: text/html")
-print("Location: " + config.BASE_URL + next_loc);
+print("Location: " + config.BASE_URL + next_loc)
 print(cookiedb.output())
 print()
 print("<head><title>Owen Taylor's Tunebook</title></head>")

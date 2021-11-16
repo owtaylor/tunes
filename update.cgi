@@ -8,14 +8,14 @@ import json
 import os
 import sys
 
-import config
 from validation import validate_dict, ValidationError
 import site_auth
 
 STATUS_TEXTS = {
-    400 : "Bad Request",
-    403 : "Forbidden"
-};
+    400: "Bad Request",
+    403: "Forbidden"
+}
+
 
 def raise_error(status, message):
     print("Status: %d %s" % (status, STATUS_TEXTS[status]))
@@ -23,6 +23,7 @@ def raise_error(status, message):
     print()
     print(message)
     sys.exit(1)
+
 
 cookiedb = http.cookies.BaseCookie()
 if 'HTTP_COOKIE' in os.environ:
@@ -35,8 +36,10 @@ except site_auth.AuthError:
 
 form = cgi.FieldStorage()
 
-if not 'charset' in form.type_options or form.type_options['charset'].lower() not in ('utf8', 'utf-8'):
+if 'charset' not in form.type_options or \
+        form.type_options['charset'].lower() not in ('utf8', 'utf-8'):
     raise_error(400, 'Only UTF-8 encoded form submissions are accepted')
+
 
 def get_field(fieldname):
     res = form.getfirst(fieldname, "").strip()
@@ -47,16 +50,17 @@ def get_field(fieldname):
     else:
         return res.decode('UTF-8')
 
-action = get_field('action');
-if action == None:
+
+action = get_field('action')
+if action is None:
     action = 'update'
-action = action.lower();
+action = action.lower()
 
 db = TuneDB()
 
 if action == 'delete':
     tune_id = get_field('id')
-    if tune_id == None:
+    if tune_id is None:
         raise_error(400, "No ID specified")
 
     try:
@@ -71,21 +75,21 @@ if action == 'delete':
     print(tune_id)
 elif action == 'update':
     values = {
-        'id' : get_field('id'),
-        'aka' : get_field('aka'),
-        'composer' : get_field('composer'),
-        'incipit' : get_field('incipit'),
-        'key' : get_field('key'),
-        'level' : get_field('level'),
-        'maxlevel' : get_field('maxlevel'),
-        'name' : get_field('name'),
-        'notes' : get_field('notes'),
-        'refs' : get_field('refs'),
-        'rhythm' : get_field('rhythm'),
-        'since' : get_field('since'),
-        'structure' : get_field('structure'),
-        'study' : get_field('study')
-    };
+        'id': get_field('id'),
+        'aka': get_field('aka'),
+        'composer': get_field('composer'),
+        'incipit': get_field('incipit'),
+        'key': get_field('key'),
+        'level': get_field('level'),
+        'maxlevel': get_field('maxlevel'),
+        'name': get_field('name'),
+        'notes': get_field('notes'),
+        'refs': get_field('refs'),
+        'rhythm': get_field('rhythm'),
+        'since': get_field('since'),
+        'structure': get_field('structure'),
+        'study': get_field('study')
+    }
 
     to_delete = []
     for k, v in values.items():
@@ -102,7 +106,7 @@ elif action == 'update':
 
     # As a courtesy, we don't consider this validation, but just fix the maxlevel
     if ('maxlevel' not in values or int(values['level']) < int(values['maxlevel'])):
-        values['maxlevel'] = values['level'];
+        values['maxlevel'] = values['level']
 
     try:
         if 'id' in values:
@@ -119,6 +123,6 @@ elif action == 'update':
 
     print("Content-Type: text/plain")
     print()
-    json.dump(new_values, sys.stdout);
+    json.dump(new_values, sys.stdout)
 
 db.close()

@@ -11,6 +11,7 @@ import time
 import config
 from tunedb import TuneDB
 
+
 def do_query(db, ref=None, tune_id=None):
     first = True
     sys.stdout.write("[")
@@ -20,8 +21,9 @@ def do_query(db, ref=None, tune_id=None):
         else:
             first = False
 
-        json.dump(values, sys.stdout);
+        json.dump(values, sys.stdout)
     sys.stdout.write("]\n")
+
 
 # Adapted from http://stackoverflow.com/questions/225086/rfc-1123-date-representation-in-python
 def format_http_date(t):
@@ -37,6 +39,7 @@ def format_http_date(t):
     return "%s, %02d %s %04d %02d:%02d:%02d GMT" % (weekday, dt.tm_mday, month,
                                                     dt.tm_year, dt.tm_hour, dt.tm_min, dt.tm_sec)
 
+
 def parse_http_date(datestr):
     # Something like Sun, 01 Feb 2009 22:24:12 GMT
     if not re.search(r"\s+GMT\s*$", datestr):
@@ -50,7 +53,9 @@ def parse_http_date(datestr):
 
     return calendar.timegm(dt)
 
+
 form = cgi.FieldStorage()
+
 
 def get_field(fieldname):
     res = form.getfirst(fieldname, "").strip()
@@ -59,7 +64,8 @@ def get_field(fieldname):
     else:
         return res
 
-ref = get_field('ref');
+
+ref = get_field('ref')
 tune_id = get_field('id')
 
 s = os.stat(config.TUNES_DB)
@@ -75,7 +81,7 @@ if s.st_mtime > last_modified:
 # responsiveness
 if 'HTTP_IF_MODIFIED_SINCE' in os.environ:
     if_modified_since = parse_http_date(os.environ['HTTP_IF_MODIFIED_SINCE'])
-    if if_modified_since != None and if_modified_since >= last_modified:
+    if if_modified_since is not None and if_modified_since >= last_modified:
         print("Last-Modified: " + format_http_date(last_modified))
         print("Status: 304 Not Modified")
         print()

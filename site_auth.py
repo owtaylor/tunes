@@ -7,13 +7,16 @@ import password_utils
 import re
 import time
 
+
 class AuthError(Exception):
     pass
+
 
 site_secret = None
 
 # For testing
 _force_crypted_password = None
+
 
 def get_site_secret():
     f = open(config.SITE_SECRET, "r")
@@ -22,18 +25,20 @@ def get_site_secret():
 
     return secret
 
+
 def make_auth(username, t=None):
-    if t == None:
+    if t is None:
         t = time.time()
     message = "%s,%d" % (username, t)
     hm = hmac.new(get_site_secret(), message.encode("UTF-8"), hashlib.sha256)
-    return message + "," +  password_utils.encode_256(hm.digest())
+    return message + "," + password_utils.encode_256(hm.digest())
+
 
 def check_auth(auth):
     auth = auth.strip()
 
-    m = re.match("([A-Za-z._]+),(\d+),.*", auth)
-    if (m == None):
+    m = re.match(r"([A-Za-z._]+),(\d+),.*", auth)
+    if not m:
         raise AuthError("Bad format for auth cookie")
 
     username = m.group(1)
@@ -49,13 +54,14 @@ def check_auth(auth):
 
     return username
 
+
 def set_auth_cookie(cookiedb, username, pw):
     if (username != config.ADMIN_USERNAME):
         raise AuthError("Unknown user")
 
     crypted = config.ADMIN_PASSWORD
 
-    if _force_crypted_password != None:
+    if _force_crypted_password is not None:
         crypted = _force_crypted_password
 
     try:
@@ -65,13 +71,15 @@ def set_auth_cookie(cookiedb, username, pw):
 
     cookiedb['tunes_auth'] = make_auth(username)
     cookiedb['tunes_auth']['path'] = config.BASE_URL
-    cookiedb['tunes_auth']['max-age'] = 356 * 24 * 60 * 60 # One year
+    cookiedb['tunes_auth']['max-age'] = 356 * 24 * 60 * 60  # One year
+
 
 def check_auth_cookie(cookiedb):
-    if not 'tunes_auth' in cookiedb:
+    if 'tunes_auth' not in cookiedb:
         raise AuthError("No auth cookie")
 
     return check_auth(cookiedb['tunes_auth'].value)
+
 
 if __name__ == '__main__':
     import http.cookies
@@ -92,6 +100,6 @@ if __name__ == '__main__':
     failed = False
     try:
         check_auth_cookie(cookiedb)
-    except AuthError as e:
+    except AuthError:
         failed = True
     assert failed
