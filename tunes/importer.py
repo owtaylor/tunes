@@ -146,6 +146,7 @@ def tune_key(a):
 
     return (sa, a['rhythm'].lower(), a['name'].lower())
 
+
 output = None
 i = 1
 while i < len(sys.argv):
