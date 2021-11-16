@@ -6,9 +6,10 @@ import re
 class PasswordError(Exception):
     pass
 
-# Not a standard MD5 encrypted password, which does 1000 passes, etc,
-# but just a direct md5(pw+salt). If the password is good, should
-# be fine, especially if the crypted value is secret.
+
+# The quality of crypting here doesn't *really* matter, since we aren't
+# storing a database of public passwords, but use scrypt so that we model
+# decent practices.
 
 
 def encode_128(inval: bytes) -> str:
@@ -28,36 +29,47 @@ def encode_256(inval: bytes) -> str:
     return b64encode(inval, b"+_")[:-1].decode("UTF-8")
 
 
+def decode_256(inval: bytes) -> str:
+    assert len(inval) == 43
+    return b64decode(inval + "=", b"+_")
+
+
 def random_bytes(len) -> bytes:
-    f = open("/dev/random", "rb")
+    f = open("/dev/urandom", "rb")
     r = f.read(len)
     f.close()
 
     return r
 
 
+# scrypt parameters - this is about as large as you can use with the
+# default max_mem, but isn't particularly strong.
+N = 16384
+R = 8
+P = 1
+
+
 def crypt_password(pw):
-    salt = random_bytes(6)
-    m = hashlib.md5()
-    m.update(pw.encode("UTF-8"))
-    m.update(salt)
-    return "MD5$"+b64encode(salt, b"+_").decode("UTF-8")+"$"+encode_128(m.digest())
+    salt = random_bytes(16)
+    crypted = hashlib.scrypt(pw.encode("UTF-8"), salt=salt, n=N, r=R, p=P)
+    return f"{N}${R}${P}${encode_128(salt)}${encode_256(crypted[:32])}"
 
 
 def check_password(crypted, pw):
     if len(pw) > 32:
         raise PasswordError("Password too long")
 
-    m = re.match(r"MD5\$([^\$]+)\$([^\$]+)$", crypted)
+    m = re.match(r"(\d+)\$(\d+)\$(\d+)\$([^\$]+)\$([^\$]+)$", crypted)
     if not m:
         raise PasswordError("Crypted password not in expected format")
 
-    salt = b64decode(m.group(1), b"+_")
-    expected = decode_128(m.group(2))
-    m = hashlib.md5()
-    m.update(pw.encode("UTF-8"))
-    m.update(salt)
-    if m.digest() != expected:
+    n = int(m.group(1))
+    r = int(m.group(2))
+    p = int(m.group(3))
+    salt = decode_128(m.group(4))
+    expected = decode_256(m.group(5))
+    crypted = hashlib.scrypt(pw.encode("UTF-8"), salt=salt, n=n, r=r, p=p)
+    if crypted[:32] != expected:
         raise PasswordError("Password doesn't match")
 
 
