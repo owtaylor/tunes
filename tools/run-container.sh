@@ -4,7 +4,7 @@ set -e
 
 live=false
 
-while [[ $# > 0 ]] ; do
+while [[ $# -gt 0 ]] ; do
     if [[ $1 == --live ]] ; then
         live=true
     fi
