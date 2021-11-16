@@ -1,6 +1,5 @@
-*.pyc
+__pycache__
 *.bak
-config.py
 data-*
 site.secret
 tunes.sqlite

@@ -19,11 +19,7 @@ _force_crypted_password = None
 
 
 def get_site_secret():
-    f = open(config.SITE_SECRET, "r")
-    secret = password_utils.decode_128(f.read().strip())
-    f.close()
-
-    return secret
+    return password_utils.decode_128(config.SITE_SECRET)
 
 
 def make_auth(username, t=None):

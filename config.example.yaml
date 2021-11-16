@@ -1,0 +1,12 @@
+# Base URL for web site
+base_url: /
+# Location of the database
+tunes_db: /srv/tunes-data/tunes.sqlite
+# Site auth secret; see make_secret script.
+# CHANGE THIS
+site_secret: QUFBQUFBQUFBQUFBQUFBQQ
+# The admin (and only user)
+admin_username: 'john.doe'
+# Password for the admin user; see crypt_password script. Below is "password1".
+# CHANGE THIS
+admin_password: 'MD5$V6hxXbtQ$0wHMFWrVFjuf609i0oElrA'
