@@ -5,8 +5,11 @@ from . import config
 
 
 class TuneDB:
-    def __init__(self):
-        self.conn = sqlite.connect(config.TUNES_DB)
+    def __init__(self, db_path=None):
+        if db_path is None:
+            db_path = config.TUNES_DB
+
+        self.conn = sqlite.connect(db_path)
 
     def query_tunes(self, tune_id=None, ref=None):
         cursor = self.conn.cursor()

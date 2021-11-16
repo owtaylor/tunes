@@ -164,7 +164,13 @@ if have_error:
 tunes.sort(key=tune_key)
 
 if output is not None:
-    db = TuneDB()
+    if os.path.exists(output):
+        print(f"{output} already exists", file=sys.stderr)
+        sys.exit(1)
+    with open("SCHEMA") as f:
+        subprocess.check_call(['sqlite3', output], stdin=f)
+
+    db = TuneDB(db_path=output)
     db.insert_tunes(tunes)
     db.close()
 else:
