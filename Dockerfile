@@ -1,7 +1,8 @@
 FROM ubi8:latest
 
-RUN yum -y update && \
-    yum -y install httpd python39 python39-pip python39-pyyaml sqlite
+RUN yum -y module enable nodejs:16 && \
+    yum -y update && \
+    yum -y install httpd npm python39 python39-pip python39-pyyaml sqlite
 
 RUN pip-3.9 install flake8
 
@@ -15,8 +16,16 @@ RUN sed -i \
 
 ENV TUNES_CONFIG=/srv/tunes-data/config.yaml
 
-ADD . /srv/tunes
+RUN mkdir -p /srv/tunes
 WORKDIR /srv/tunes
+
+ADD package.json /srv/tunes
+RUN npm install
+
+ADD tools /srv/tunes/tools
+ADD tunes /srv/tunes/tunes
+ADD README.md config.example.yaml example.data .eslintrc.yml .flake8 *.cgi *.html *.js *.css /srv/tunes
+
 RUN mkdir /srv/tunes-data && \
     cp config.example.yaml /srv/tunes-data/config.yaml && \
     sqlite3 /srv/tunes-data/tunes.sqlite < example.data && \

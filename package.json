@@ -1,0 +1,12 @@
+{
+  "name": "tunes",
+  "version": "0.1.0",
+  "description": "Personal Tunes Notebook",
+  "main": "tunes.js",
+  "author": "Owen Taylor",
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^8.2.0",
+    "eslint-config-google": "^0.14.0"
+  }
+}

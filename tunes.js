@@ -1,5 +1,6 @@
 /* -*- mode: js2; js2-basic-offset: 4; indent-tabs-mode: nil -*- */
 
+(function() {
 var mobile = false;
 var page;
 var allTunes;
@@ -31,12 +32,12 @@ RHYTHMS = {
     'piece': "Pieces",
     'polka': "Polkas",
     'reel': "Reels",
-    'schottische' : "Schottisches",
+    'schottische': "Schottisches",
     'set dance': "Set Dances",
     'slide': "Slides",
     'slip jig': "Slip Jigs",
     'strathspey': "Strathspeys",
-    'waltz': "Waltzes"
+    'waltz': "Waltzes",
 };
 
 function _make(element, cls, text) {
@@ -54,7 +55,7 @@ var LEVEL_SYMBOLS = [
     "\u25d1", // CIRCLE WITH RIGHT HALF BLACK // \u25d0", // CIRCLE WITH LEFT HALF BLACK
     "\u25d4", // CIRCLE WITH RIGHT QUADRANT BLACK // \u2022", // BULLET
     "\u25cb", // WHITE CIRCLE // \u25e6", // WHITE BULLET
-    " "
+    " ",
 ];
 
 function _makeLevelSymbol(level, maxlevel) {
@@ -126,8 +127,8 @@ function refilter() {
             }
         }
 
-      if (lastheader)
-          $(lastheader).hide();
+        if (lastheader)
+            $(lastheader).hide();
     }
 }
 
@@ -267,14 +268,14 @@ function setCurrentObject(obj, changeHistory) {
     }
 }
 
-
 function fillInfo(tune) {
     var infoDiv = $("#infoDiv");
     infoDiv.empty();
 
     var nameDiv = _make("div", "info-name");
     nameDiv.appendChild(_makeLevelSymbol(tune.level, tune.maxlevel));
-    nameDiv.appendChild(_make("span", "info-name-text", "\u2009" + tune.name)); // \u2009 = THIN SPACE
+    // \u2009 = THIN SPACE
+    nameDiv.appendChild(_make("span", "info-name-text", "\u2009" + tune.name));
     infoDiv.append(nameDiv);
 
     if (tune.aka != null) {
@@ -328,11 +329,13 @@ function selectLevel(level) {
     $("#editLevelParent").children().removeClass("level-select-selected");
     $("#editLevel" + level).addClass("level-select-selected");
 }
+window.selectLevel = selectLevel;
 
 function selectMaxlevel(level) {
     $("#editMaxlevelParent").children().removeClass("level-select-selected");
     $("#editMaxlevel" + level).addClass("level-select-selected");
 }
+window.selectMaxlevel = selectMaxlevel;
 
 function getLevel() {
     var level;
@@ -341,7 +344,7 @@ function getLevel() {
             return level;
     }
 
-    throw "No selected level";
+    throw new Error("No selected level");
 }
 
 function getMaxlevel() {
@@ -351,7 +354,7 @@ function getMaxlevel() {
             return level;
     }
 
-    throw "No selected maxlevel";
+    throw new Error("No selected maxlevel");
 }
 
 function fillEdit(tune) {
@@ -376,19 +379,19 @@ function fillEdit(tune) {
 
 function fetchEditData() {
     var result = {
-        name : $("#editName").val(),
-        aka : $("#editAka").val(),
-        rhythm : $("#editRhythm").val(),
-        key : $("#editKey").val(),
-        structure : $("#editStructure").val(),
-        composer : $("#editComposer").val(),
-        refs : $("#editRefs").val(),
-        incipit : $("#editIncipit").val(),
-        since : $("#editSince").val(),
-        level : getLevel(),
-        maxlevel : getMaxlevel(),
-        notes : $("#editNotes").val(),
-        study : $("#editStudy").attr("checked") ? '1' : '0'
+        name: $("#editName").val(),
+        aka: $("#editAka").val(),
+        rhythm: $("#editRhythm").val(),
+        key: $("#editKey").val(),
+        structure: $("#editStructure").val(),
+        composer: $("#editComposer").val(),
+        refs: $("#editRefs").val(),
+        incipit: $("#editIncipit").val(),
+        since: $("#editSince").val(),
+        level: getLevel(),
+        maxlevel: getMaxlevel(),
+        notes: $("#editNotes").val(),
+        study: $("#editStudy").attr("checked") ? '1' : '0',
     };
 
     if (editId != null) {
@@ -452,13 +455,12 @@ function linkify(str, parent) {
             linkifyAppendPlain(str, parent, start, m.index);
             if (m[1] != null) {
                 linkifyAppendLink(parent,
-                                  "NG" + m[1],
-                                  "http://www.irishtune.info/tune/" + m[1] + "/");
-            }
-            else if (m[2] != null) {
+                    "NG" + m[1],
+                    "http://www.irishtune.info/tune/" + m[1] + "/");
+            } else if (m[2] != null) {
                 linkifyAppendLink(parent,
-                                  "TS" + m[2],
-                                  "http://www.thesession.org/tunes/display/" + m[2]);
+                    "TS" + m[2],
+                    "http://www.thesession.org/tunes/display/" + m[2]);
             }
         }
     }
@@ -486,7 +488,6 @@ function createTuneRow(tune) {
         tr.appendChild(td);
     }
 
-    var a;
     td = document.createElement("td");
     td.appendChild(document.createTextNode(name));
     if (tune.study == 1)
@@ -672,7 +673,7 @@ function updateTunes(tunes) {
         }
     }
 
-    for (id in newTunes) {
+    for (id of newTunes) {
         allTunes.push(newTunes[id]);
     }
 
@@ -738,15 +739,13 @@ function getUsername() {
 // Fill in the Rhythm dropdrowns - do this dynamically to avoid
 // having to maintain the rhythm list in the HTML as well
 function createRhythmOptions() {
-    var i;
     var editRhythm = document.getElementById("editRhythm");
     var filterRhythm = document.getElementById("filterRhythm");
     var option;
 
     var rhythms = [];
-    var rhythm;
 
-    for (rhythm in RHYTHMS)
+    for (const rhythm of Object.keys(RHYTHMS))
         rhythms.push(rhythm);
     rhythms.sort();
 
@@ -756,18 +755,17 @@ function createRhythmOptions() {
         filterRhythm.appendChild(option);
     }
 
-    for (i = 0; i < rhythms.length; i++) {
-        rhythm = rhythms[i];
-        var rhythm_name;
+    for (const rhythm of rhythms) {
+        var rhythmName;
         if (rhythm == 'march')
-            rhythm_name = "March";
+            rhythmName = "March";
         else if (rhythm == 'waltz')
-            rhythm_name = "Waltz";
+            rhythmName = "Waltz";
         else
-            rhythm_name = RHYTHMS[rhythm].slice(0, -1);
+            rhythmName = RHYTHMS[rhythm].slice(0, -1);
 
         if (editRhythm) {
-            option = _make("option", null, rhythm_name);
+            option = _make("option", null, rhythmName);
             option.value = rhythm;
             editRhythm.appendChild(option);
         }
@@ -873,12 +871,12 @@ function init() {
 
     $("#filterInput").focus();
     // Would have to catch oninput/onpaste to get paste right
-    $("#filterInput").keyup(function() { filterChanged(); });
-    $("#filterInput").change(function() { filterChanged(); });
-    $("#studyOnly").change(function() { filterChanged(); });
+    $("#filterInput").keyup(filterChanged);
+    $("#filterInput").change(filterChanged);
+    $("#studyOnly").change(filterChanged);
 
     $("#filterRhythm").val("all");
-    $("#filterRhythm").change(function() { filterChanged(); });
+    $("#filterRhythm").change(filterChanged);
 
     username = getUsername();
     if (username != null) {
@@ -903,8 +901,7 @@ function init() {
                 event.preventDefault();
                 event.stopPropagation();
                 selectPrevious();
-            }
-            else if (event.keyCode == 40) { // Down arrow
+            } else if (event.keyCode == 40) { // Down arrow
                 event.preventDefault();
                 event.stopPropagation();
                 selectNext();
@@ -920,6 +917,7 @@ function init() {
         }
     });
 }
+window.init = init;
 
 function getQueryParams() {
     var query = window.location.search.substring(1);
@@ -944,7 +942,7 @@ function buildQueryString(queryParams) {
     var result = null;
 
     var k;
-    for (k in queryParams) {
+    for (k of queryParams) {
         var component = k + "=" + encodeURIComponent(queryParams[k]);
         if (result == null)
             result = component;
@@ -1007,7 +1005,6 @@ function initEditPage() {
                     editId = tune.id;
                 }
             });
-
     } else {
         document.title = BASE_TITLE + " - New Tune";
 
@@ -1022,6 +1019,7 @@ function initEditPage() {
     inEdit = true;
     $("#editName").focus();
 }
+window.initEditPage = initEditPage;
 
 function initLoginPage() {
     page = "login";
@@ -1033,6 +1031,7 @@ function initLoginPage() {
         $("#loginNextInput").val(next + buildQueryString(queryParams));
     }
 }
+window.initLoginPage = initLoginPage;
 
 // Reload the content of the page, without trigger revalidation as document.location.reload()
 function refresh() {
@@ -1043,6 +1042,7 @@ function logout() {
     document.cookie = "tunes_auth=";
     refresh();
 }
+window.logout = logout;
 
 function editMode() {
     $("#infoDiv").hide();
@@ -1068,7 +1068,7 @@ function infoMode() {
 }
 
 function actionPrev() {
-    if (randomPosition  != -1) {
+    if (randomPosition != -1) {
         if (randomPosition > 0) {
             randomPosition--;
             setCurrentObject(randomRows[randomPosition]);
@@ -1079,10 +1079,12 @@ function actionPrev() {
         selectPrevious();
     }
 }
+window.actionPrev = actionPrev;
 
 function actionUp() {
     setCurrentObject(null);
 }
+window.actionUp = actionUp;
 
 function actionNext() {
     if (randomPosition != -1) {
@@ -1096,6 +1098,7 @@ function actionNext() {
         selectNext();
     }
 }
+window.actionNext = actionNext;
 
 function actionEdit() {
     if (!selectedRow)
@@ -1106,6 +1109,7 @@ function actionEdit() {
     inEdit = true;
     editMode();
 }
+window.actionEdit = actionEdit;
 
 function actionDelete() {
     if (!selectedRow)
@@ -1116,6 +1120,7 @@ function actionDelete() {
     $("#dialogCancelButton").focus();
     dialogUp = true;
 }
+window.actionDelete = actionDelete;
 
 function actionNew(changeHistory) {
     if (changeHistory === undefined)
@@ -1126,6 +1131,7 @@ function actionNew(changeHistory) {
     inEdit = true;
     editMode();
 }
+window.actionCancel = actionCancel;
 
 function actionCancel() {
     infoMode();
@@ -1134,6 +1140,7 @@ function actionCancel() {
     if (currentObject == 'new')
         setCurrentObject(null);
 }
+window.actionNew = actionNew;
 
 function actionSave() {
     $.ajax({
@@ -1167,9 +1174,10 @@ function actionSave() {
         },
         error: function(request, textStatus, errorThrown) {
             alert(request.responseText);
-        }
+        },
     });
 }
+window.actionSave = actionSave;
 
 function dialogOKClicked() {
     $("#dialogDiv").hide();
@@ -1190,7 +1198,7 @@ function dialogOKClicked() {
         contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
         data: {
             action: 'delete',
-            id: deletedId
+            id: deletedId,
         },
         dataType: "json",
         success: function(tune, status) {
@@ -1204,14 +1212,16 @@ function dialogOKClicked() {
         },
         error: function(request, textStatus, errorThrown) {
             alert(request.responseText);
-        }
+        },
     });
 }
+window.dialogOKClicked = dialogOKClicked;
 
 function dialogCancelClicked() {
     $("#dialogDiv").hide();
     dialogUp = false;
 }
+window.dialogCancelClicked = dialogCancelClicked;
 
 function selectRandom(type) {
     var rows = document.getElementById("tuneBody").childNodes;
@@ -1246,3 +1256,5 @@ function selectRandom(type) {
         }
     }
 }
+window.selectRandom = selectRandom;
+})();

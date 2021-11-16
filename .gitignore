@@ -1,4 +1,6 @@
 __pycache__
 *.bak
+node_modules
+package-lock.json
 site.secret
 tunes.sqlite

@@ -4,6 +4,8 @@ set +e -x
 
 flake8 tools/ ./*.cgi
 [ $? == 0 ] || failed="$failed flake8"
+node_modules/.bin/eslint tunes.js
+[ $? == 0 ] || failed="$failed eslint"
 
 set -e +x
 
