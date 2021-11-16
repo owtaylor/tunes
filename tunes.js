@@ -1,26 +1,26 @@
 /* -*- mode: js2; js2-basic-offset: 4; indent-tabs-mode: nil -*- */
 
 (function() {
-var mobile = false;
-var page;
-var allTunes;
-var filterText;
-var rhythmFilter;
-var studyOnly;
-var selectedRow;
-var currentObject;
-var upIsBack = false;
-var inEdit = false;
-var editId = null;
-var dialogUp = false;
-var randomPosition = -1;
-var randomRows = [];
+let mobile = false;
+let page;
+let allTunes;
+let filterText;
+let rhythmFilter;
+let studyOnly;
+let selectedRow;
+let currentObject;
+let upIsBack = false;
+let inEdit = false;
+let editId = null;
+let dialogUp = false;
+let randomPosition = -1;
+let randomRows = [];
 
-var COLUMN_COUNT = 5;
-var MOBILE_COLUMN_COUNT = 3;
-var BASE_TITLE = "Owen Taylor's Tunebook";
+const COLUMN_COUNT = 5;
+const MOBILE_COLUMN_COUNT = 3;
+const BASE_TITLE = "Owen Taylor's Tunebook";
 
-RHYTHMS = {
+const RHYTHMS = {
     'air': "Airs",
     'barn dance': "Barn Dances",
     'fling': "Flings",
@@ -41,7 +41,7 @@ RHYTHMS = {
 };
 
 function _make(element, cls, text) {
-    var div = document.createElement(element);
+    const div = document.createElement(element);
     if (text != null)
         div.appendChild(document.createTextNode(text));
     if (cls)
@@ -50,7 +50,7 @@ function _make(element, cls, text) {
     return div;
 }
 
-var LEVEL_SYMBOLS = [
+const LEVEL_SYMBOLS = [
     "\u25cF", // BLACK CIRCLE
     "\u25d1", // CIRCLE WITH RIGHT HALF BLACK // \u25d0", // CIRCLE WITH LEFT HALF BLACK
     "\u25d4", // CIRCLE WITH RIGHT QUADRANT BLACK // \u2022", // BULLET
@@ -59,7 +59,7 @@ var LEVEL_SYMBOLS = [
 ];
 
 function _makeLevelSymbol(level, maxlevel) {
-    var span = _make("span");
+    const span = _make("span");
 
     if (maxlevel != null)
         span.appendChild(_make("span", "symbol-maxlevel", LEVEL_SYMBOLS[maxlevel - 1]));
@@ -69,9 +69,9 @@ function _makeLevelSymbol(level, maxlevel) {
 }
 
 function filterChanged() {
-    var newFilter = $("#filterInput").val();
-    var newStudyOnly = $("#studyOnly").attr('checked');
-    var newRhythm = $("#filterRhythm").val();
+    const newFilter = $("#filterInput").val();
+    const newStudyOnly = $("#studyOnly").attr('checked');
+    const newRhythm = $("#filterRhythm").val();
 
     if (newFilter == filterText && newStudyOnly == studyOnly && newRhythm == rhythmFilter)
         return;
@@ -84,8 +84,8 @@ function filterChanged() {
 }
 
 function refilter() {
-    var filterRegexp = new RegExp(filterText, 'i');
-    var filterFunction = function(tune) {
+    const filterRegexp = new RegExp(filterText, 'i');
+    const filterFunction = function(tune) {
         if (studyOnly && tune.study != 1)
             return false;
 
@@ -95,14 +95,10 @@ function refilter() {
         return filterRegexp.test(tune.name) || (tune.aka != null && filterRegexp.test(tune.aka));
     };
 
-
-    var tuneBody = document.getElementById("tuneBody");
-    var rows = tuneBody.childNodes;
-    var lastheader = null;
-    var i;
-    for (i = 0; i < rows.length; i++) {
-        var row = rows[i];
-
+    const tuneBody = document.getElementById("tuneBody");
+    const rows = tuneBody.childNodes;
+    let lastheader = null;
+    for (const row of rows) {
         if (row.nodeType != Node.ELEMENT_NODE)
             continue;
 
@@ -133,12 +129,11 @@ function refilter() {
 }
 
 function findRow(tuneId) {
-    tuneId = parseInt(tuneId);
+    const tuneIdInt = parseInt(tuneId);
 
-    var rows = document.getElementById("tuneBody").childNodes;
-    for (var i = 0; i < rows.length; i++) {
-        var row = rows[i];
-        if (row.tune && row.tune.id == tuneId)
+    const rows = document.getElementById("tuneBody").childNodes;
+    for (const row of rows) {
+        if (row.tune && row.tune.id == tuneIdInt)
             return row;
     }
 
@@ -146,8 +141,8 @@ function findRow(tuneId) {
 }
 
 function getRowY(row) {
-    var parent = row;
-    var rowY = 0;
+    let parent = row;
+    let rowY = 0;
     while (parent) {
         rowY += parent.offsetTop;
         parent = parent.offsetParent;
@@ -157,11 +152,11 @@ function getRowY(row) {
 }
 
 function scrollRowVisible(row) {
-    var rowY = getRowY(row);
-    var rowHeight = row.offsetHeight;
+    const rowY = getRowY(row);
+    const rowHeight = row.offsetHeight;
 
-    var visibleMin = document.getElementById("headerDiv").offsetHeight + window.scrollY;
-    var visibleMax = window.innerHeight + window.scrollY;
+    const visibleMin = document.getElementById("headerDiv").offsetHeight + window.scrollY;
+    const visibleMax = window.innerHeight + window.scrollY;
 
     if (rowY < visibleMin) {
         window.scrollTo(0, window.scrollY - (visibleMin - rowY));
@@ -171,26 +166,23 @@ function scrollRowVisible(row) {
 }
 
 function centerRow(row) {
-    var rowY = getRowY(row);
-    var rowHeight = row.offsetHeight;
+    const rowY = getRowY(row);
+    const rowHeight = row.offsetHeight;
 
-    var visibleMin = document.getElementById("headerDiv").offsetHeight + window.scrollY;
-    var visibleMax = window.innerHeight + window.scrollY;
+    const visibleMin = document.getElementById("headerDiv").offsetHeight + window.scrollY;
+    const visibleMax = window.innerHeight + window.scrollY;
 
     window.scrollTo(0, window.scrollY + ((rowY + rowHeight / 2) - (visibleMin + visibleMax) / 2));
 }
 
-function setCurrentObject(obj, changeHistory) {
-    if (changeHistory === undefined)
-        changeHistory = true;
-
+function setCurrentObject(obj, changeHistory=true) {
     if (!mobile)
         changeHistory = false;
 
     if (currentObject == obj)
         return;
 
-    var hadObject = !!currentObject;
+    const hadObject = !!currentObject;
 
     if (changeHistory && hadObject && !obj && upIsBack) {
         history.back();
@@ -235,7 +227,7 @@ function setCurrentObject(obj, changeHistory) {
         return;
     }
 
-    var id = (obj == 'new') ? 'new' : obj.tune.id;
+    const id = (obj == 'new') ? 'new' : obj.tune.id;
 
     if (hadObject) {
         if (changeHistory)
@@ -257,7 +249,7 @@ function setCurrentObject(obj, changeHistory) {
     }
 
     if (mobile) {
-        var name = (obj == 'new') ? 'New' : obj.tune.name;
+        const name = (obj == 'new') ? 'New' : obj.tune.name;
         document.title = name + " - Owen Taylor's Tunebook";
     }
 
@@ -269,57 +261,56 @@ function setCurrentObject(obj, changeHistory) {
 }
 
 function fillInfo(tune) {
-    var infoDiv = $("#infoDiv");
+    const infoDiv = $("#infoDiv");
     infoDiv.empty();
 
-    var nameDiv = _make("div", "info-name");
+    const nameDiv = _make("div", "info-name");
     nameDiv.appendChild(_makeLevelSymbol(tune.level, tune.maxlevel));
     // \u2009 = THIN SPACE
     nameDiv.appendChild(_make("span", "info-name-text", "\u2009" + tune.name));
     infoDiv.append(nameDiv);
 
     if (tune.aka != null) {
-        var akas = tune.aka.split(/\s*;\s*/);
-        var i;
-        for (i = 0; i < akas.length; i++) {
-            infoDiv.append(_make("div", "info-aka", akas[i]));
+        const akas = tune.aka.split(/\s*;\s*/);
+        for (const aka of akas) {
+            infoDiv.append(_make("div", "info-aka", aka));
         }
     }
 
-    var details = RHYTHMS[tune.rhythm].slice(0, -1) + " - " + tune.key;
+    let details = RHYTHMS[tune.rhythm].slice(0, -1) + " - " + tune.key;
     if (tune.structure)
         details += " - " + tune.structure;
     infoDiv.append(_make("div", "info-details", details));
 
     if (tune.composer != null) {
-        var composerDiv = _make("div", "info-composer");
+        const composerDiv = _make("div", "info-composer");
         composerDiv.appendChild(_make("span", "info-label", "Composer: "));
         composerDiv.appendChild(_make("span", "info-value", tune.composer));
         infoDiv.append(composerDiv);
     }
 
     if (tune.refs != null) {
-        var refsDiv = _make("div", "info-refs");
+        const refsDiv = _make("div", "info-refs");
         linkify(tune.refs, refsDiv);
         infoDiv.append(refsDiv);
     }
 
     if (tune.incipit != null) {
-        var incipitDiv = _make("div", "info-incipit");
+        const incipitDiv = _make("div", "info-incipit");
         incipitDiv.appendChild(_make("span", "info-label", "Starts: "));
         incipitDiv.appendChild(_make("span", "info-value", tune.incipit));
         infoDiv.append(incipitDiv);
     }
 
     if (tune.since != null) {
-        var sinceDiv = _make("div", "info-since");
+        const sinceDiv = _make("div", "info-since");
         sinceDiv.appendChild(_make("span", "info-label", "Since: "));
         sinceDiv.appendChild(_make("span", "info-value", tune.since));
         infoDiv.append(sinceDiv);
     }
 
     if (tune.notes != null) {
-        var notesDiv = _make("div", "info-notes");
+        const notesDiv = _make("div", "info-notes");
         linkify(tune.notes, notesDiv);
         infoDiv.append(notesDiv);
     }
@@ -338,8 +329,7 @@ function selectMaxlevel(level) {
 window.selectMaxlevel = selectMaxlevel;
 
 function getLevel() {
-    var level;
-    for (level = 1; level <= 5; level++) {
+    for (let level = 1; level <= 5; level++) {
         if ($("#editLevel" + level).hasClass("level-select-selected"))
             return level;
     }
@@ -348,8 +338,7 @@ function getLevel() {
 }
 
 function getMaxlevel() {
-    var level;
-    for (level = 1; level <= 5; level++) {
+    for (let level = 1; level <= 5; level++) {
         if ($("#editMaxlevel" + level).hasClass("level-select-selected"))
             return level;
     }
@@ -367,7 +356,7 @@ function fillEdit(tune) {
     $("#editRefs").val(tune.refs != null ? tune.refs : "");
     $("#editIncipit").val(tune.incipit != null ? tune.incipit : "");
     $("#editSince").val(tune.since != null ? tune.since : "");
-    var level = tune.level != null ? tune.level : 5;
+    const level = tune.level != null ? tune.level : 5;
     selectLevel(level);
     selectMaxlevel(tune.maxlevel != null ? tune.maxlevel : level);
     $("#editNotes").val(tune.notes != null ? tune.notes : "");
@@ -378,7 +367,7 @@ function fillEdit(tune) {
 }
 
 function fetchEditData() {
-    var result = {
+    const result = {
         name: $("#editName").val(),
         aka: $("#editAka").val(),
         rhythm: $("#editRhythm").val(),
@@ -434,20 +423,20 @@ function linkifyAppendPlain(str, parent, start, end) {
 }
 
 function linkifyAppendLink(parent, text, href) {
-    var a = document.createElement("a");
+    const a = document.createElement("a");
     a.appendChild(document.createTextNode(text));
     a.href = href;
     a.target = "_blank";
     parent.appendChild(a);
 }
 
-var LINKIFY_REGEXP = /(?:ng(\d+))|(?:ts(\d+))/g;
+const LINKIFY_REGEXP = /(?:ng(\d+))|(?:ts(\d+))/g;
 
 function linkify(str, parent) {
     LINKIFY_REGEXP.lastIndex = 0;
     while (true) {
-        var start = LINKIFY_REGEXP.lastIndex;
-        var m = LINKIFY_REGEXP.exec(str);
+        const start = LINKIFY_REGEXP.lastIndex;
+        const m = LINKIFY_REGEXP.exec(str);
         if (m == null) {
             linkifyAppendPlain(str, parent, start, str.length);
             return;
@@ -467,50 +456,54 @@ function linkify(str, parent) {
 }
 
 function createTuneRow(tune) {
-    var tr = document.createElement("tr");
+    const tr = document.createElement("tr");
     // Backreference for future use
     tr.tune = tune;
 
-    var td;
+    {
+        const td = document.createElement("td");
+        td.appendChild(_makeLevelSymbol(tune.level, tune.maxlevel));
+        tr.appendChild(td);
+    }
 
-    td = document.createElement("td");
-    td.appendChild(_makeLevelSymbol(tune.level, tune.maxlevel));
-    tr.appendChild(td);
-
-    var name = tune.name;
+    let name = tune.name;
     if (tune.aka != null)
         name += " (" + tune.aka + ")";
 
     if (!mobile) {
-        td = document.createElement("td");
+        const td = document.createElement("td");
         if (tune.refs != null)
             linkify(tune.refs, td);
         tr.appendChild(td);
     }
 
-    td = document.createElement("td");
-    td.appendChild(document.createTextNode(name));
-    if (tune.study == 1)
-        td.className = "study-name";
-    tr.appendChild(td);
+    {
+        const td = document.createElement("td");
+        td.appendChild(document.createTextNode(name));
+        if (tune.study == 1)
+            td.className = "study-name";
+        tr.appendChild(td);
+    }
 
     if (!mobile) {
-        td = document.createElement("td");
+        const td = document.createElement("td");
         if (tune.since != null)
             td.appendChild(document.createTextNode(tune.since));
         tr.appendChild(td);
     }
 
-    td = document.createElement("td");
-    td.className = "tune-flags";
-    flags = "";
-    if (tune.incipit != null)
-        flags += "\u266b"; // BEAMED EIGHTH NOTES
-    if (tune.notes != null)
-        flags += "\u270d"; // WRITING HAND
+    {
+        const td = document.createElement("td");
+        td.className = "tune-flags";
+        let flags = "";
+        if (tune.incipit != null)
+            flags += "\u266b"; // BEAMED EIGHTH NOTES
+        if (tune.notes != null)
+            flags += "\u270d"; // WRITING HAND
 
-    td.appendChild(document.createTextNode(flags));
-    tr.appendChild(td);
+        td.appendChild(document.createTextNode(flags));
+        tr.appendChild(td);
+    }
 
     $(tr).click(function(event) {
         if (!inEdit) {
@@ -542,28 +535,25 @@ function createTuneRow(tune) {
 //  - allTunes and the tune table are sorted in the same order
 //
 function updateTuneElements() {
-    var i;
-    var tuneBody = document.getElementById("tuneBody");
+    const tuneBody = document.getElementById("tuneBody");
 
-    var rhythm;
-    var key;
-    var tr;
+    let rhythm;
+    let key;
+    let tr;
 
     // Make a copy of the old rows, since deleting children may confuse things
     // element.childNodes() doesn't support slice() which we could use to
     // copy a normal array
-    var tmp = tuneBody.childNodes;
-    var oldRows = [];
-    for (i = 0; i < tmp.length; i++) {
-        oldRows.push(tmp[i]);
+    const tmp = tuneBody.childNodes;
+    const oldRows = [];
+    for (const row of tmp) {
+        oldRows.push(row);
     }
 
-    var oldIndex = 0;
+    let oldIndex = 0;
 
-    for (i = 0; i < allTunes.length; i++) {
-        var tune = allTunes[i];
-
-        var oldRow;
+    for (const tune of allTunes) {
+        let oldRow;
         if (oldIndex < oldRows.length)
             oldRow = oldRows[oldIndex];
         else
@@ -599,9 +589,8 @@ function updateTuneElements() {
             } else {
                 // Create a new header
                 tr = document.createElement("tr");
-                var th;
 
-                th = document.createElement("th");
+                const th = document.createElement("th");
                 th.appendChild(document.createTextNode(RHYTHMS[tune.rhythm] + " - " + tune.key));
                 th.colSpan = mobile ? MOBILE_COLUMN_COUNT : COLUMN_COUNT;
                 tr.appendChild(th);
@@ -655,17 +644,14 @@ function updateTuneElements() {
 }
 
 function updateTunes(tunes) {
-    var i;
-    var tune;
-    var newTunes = {};
-    var replacedTunes = {};
-    for (i = 0; i < tunes.length; i++) {
-        tune = tunes[i];
+    const newTunes = {};
+    const replacedTunes = {};
+    for (const tune of tunes) {
         newTunes[tune.id] = tune;
     }
 
-    for (i = 0; i < allTunes.length; i++) {
-        tune = allTunes[i];
+    for (let i = 0; i < allTunes.length; i++) {
+        const tune = allTunes[i];
         if (tune.id in newTunes) {
             allTunes[i] = newTunes[tune.id];
             delete newTunes[tune.id];
@@ -673,7 +659,7 @@ function updateTunes(tunes) {
         }
     }
 
-    for (id of newTunes) {
+    for (const id of newTunes) {
         allTunes.push(newTunes[id]);
     }
 
@@ -690,16 +676,13 @@ function updateTunes(tunes) {
 }
 
 function deleteTunes(ids) {
-    var i;
-
-    var deletedMap = {};
-    for (i = 0; i < ids.length; i++) {
-        deletedMap[ids[i]] = 1;
+    const deletedMap = {};
+    for (const id of ids) {
+        deletedMap[id] = 1;
     }
 
-    var newAllTunes = [];
-    for (i = 0; i < allTunes.length; i++) {
-        var tune = allTunes[i];
+    const newAllTunes = [];
+    for (const tune of allTunes) {
         if (!(tune.id in deletedMap))
             newAllTunes.push(tune);
     }
@@ -715,7 +698,7 @@ function deleteTunes(ids) {
 }
 
 function getUsername() {
-    var v = document.cookie;
+    let v = document.cookie;
     if (v == null)
         return null;
 
@@ -724,10 +707,9 @@ function getUsername() {
     if (v == "")
         return null;
 
-    var cookies = v.split(/\s*;\s*/);
-    var i;
-    for (i = 0; i < cookies.length; i++) {
-        var m = cookies[i].match(/^tunes_auth\s*=\s*([a-zA-Z_.]+),/);
+    const cookies = v.split(/\s*;\s*/);
+    for (const cookie of cookies) {
+        const m = cookie.match(/^tunes_auth\s*=\s*([a-zA-Z_.]+),/);
         if (m != null) {
             return m[1];
         }
@@ -739,24 +721,23 @@ function getUsername() {
 // Fill in the Rhythm dropdrowns - do this dynamically to avoid
 // having to maintain the rhythm list in the HTML as well
 function createRhythmOptions() {
-    var editRhythm = document.getElementById("editRhythm");
-    var filterRhythm = document.getElementById("filterRhythm");
-    var option;
+    const editRhythm = document.getElementById("editRhythm");
+    const filterRhythm = document.getElementById("filterRhythm");
 
-    var rhythms = [];
+    const rhythms = [];
 
     for (const rhythm of Object.keys(RHYTHMS))
         rhythms.push(rhythm);
     rhythms.sort();
 
     if (filterRhythm) {
-        option = _make("option", null, "All");
+        const option = _make("option", null, "All");
         option.value = "all";
         filterRhythm.appendChild(option);
     }
 
     for (const rhythm of rhythms) {
-        var rhythmName;
+        let rhythmName;
         if (rhythm == 'march')
             rhythmName = "March";
         else if (rhythm == 'waltz')
@@ -765,13 +746,13 @@ function createRhythmOptions() {
             rhythmName = RHYTHMS[rhythm].slice(0, -1);
 
         if (editRhythm) {
-            option = _make("option", null, rhythmName);
+            const option = _make("option", null, rhythmName);
             option.value = rhythm;
             editRhythm.appendChild(option);
         }
 
         if (filterRhythm) {
-            option = _make("option", null, RHYTHMS[rhythm]);
+            const option = _make("option", null, RHYTHMS[rhythm]);
             option.value = rhythm;
             filterRhythm.appendChild(option);
         }
@@ -782,7 +763,7 @@ function selectNext() {
     if (!selectedRow)
         return false;
 
-    var node = selectedRow.nextSibling;
+    let node = selectedRow.nextSibling;
     while (node) {
         if (node.tune != null && !node.filtered) {
             setCurrentObject(node);
@@ -798,7 +779,7 @@ function selectPrevious() {
     if (!selectedRow)
         return false;
 
-    var node = selectedRow.previousSibling;
+    let node = selectedRow.previousSibling;
     while (node) {
         if (node.tune != null && !node.filtered) {
             setCurrentObject(node);
@@ -816,7 +797,7 @@ function onpopstate(event) {
     } else if (event.state == 'new') {
         actionNew(false);
     } else {
-        var row = findRow(event.state);
+        const row = findRow(event.state);
         if (row) {
             setCurrentObject(row, false);
             return;
@@ -825,13 +806,13 @@ function onpopstate(event) {
 }
 
 function selectInitial() {
-    var queryParams = getQueryParams();
+    const queryParams = getQueryParams();
     if ('tune' in queryParams) {
         if (queryParams['tune'] == 'new') {
             actionNew(false);
             history.replaceState('new', null, '?tune=new');
         } else {
-            var row = findRow(queryParams['tune']);
+            const row = findRow(queryParams['tune']);
             if (row) {
                 setCurrentObject(row, false);
 
@@ -847,7 +828,7 @@ function selectInitial() {
 function init() {
     page = "index";
 
-    var mediaTypeDiv = document.getElementById("mediaTypeDiv");
+    const mediaTypeDiv = document.getElementById("mediaTypeDiv");
     if (window.getComputedStyle(mediaTypeDiv).fontWeight == 'bold' ||
         window.getComputedStyle(mediaTypeDiv).fontWeight == 700) {
         mobile = true;
@@ -878,7 +859,7 @@ function init() {
     $("#filterRhythm").val("all");
     $("#filterRhythm").change(filterChanged);
 
-    username = getUsername();
+    const username = getUsername();
     if (username != null) {
         $("#userSpan").text(username);
         $("#loginDiv").hide();
@@ -920,17 +901,15 @@ function init() {
 window.init = init;
 
 function getQueryParams() {
-    var query = window.location.search.substring(1);
+    const query = window.location.search.substring(1);
     if (query == null || query == "")
         return {};
 
-    var components = query.split(/&/);
+    const components = query.split(/&/);
 
-    var params = {};
-    var i;
-    for (i = 0; i < components.length; i++) {
-        var component = components[i];
-        var m = component.match(/([^=]+)=(.*)/);
+    const params = {};
+    for (const component of components) {
+        const m = component.match(/([^=]+)=(.*)/);
         if (m)
             params[m[1]] = decodeURIComponent(m[2]);
     }
@@ -939,11 +918,10 @@ function getQueryParams() {
 }
 
 function buildQueryString(queryParams) {
-    var result = null;
+    let result = null;
 
-    var k;
-    for (k of queryParams) {
-        var component = k + "=" + encodeURIComponent(queryParams[k]);
+    for (const k of Object.keys(queryParams)) {
+        const component = k + "=" + encodeURIComponent(queryParams[k]);
         if (result == null)
             result = component;
         else
@@ -957,29 +935,30 @@ function buildQueryString(queryParams) {
 }
 
 function getNoQueryUrl() {
-    var m = document.location.href.match(/([^?]*)/);
+    const m = document.location.href.match(/([^?]*)/);
     return m[1];
 }
 
 function getBaseUrl() {
-    var noQueryUrl = getNoQueryUrl();
-    var m = noQueryUrl.match(/(.*\/)[^\/]*$/);
+    const noQueryUrl = getNoQueryUrl();
+    const m = noQueryUrl.match(/(.*\/)[^\/]*$/);
     return m[1];
 }
 
 function getRelativePath() {
-    var noQueryUrl = getNoQueryUrl();
-    var m = noQueryUrl.match(/.*\/([^\/]*)$/);
+    const noQueryUrl = getNoQueryUrl();
+    const m = noQueryUrl.match(/.*\/([^\/]*)$/);
     return m[1];
 }
 
 function initEditPage() {
     page = "edit";
 
-    var username = getUsername();
+    const username = getUsername();
     if (username != null) {
         $("#userSpan").text(username);
     } else {
+        let url;
         if (document.location.search == null || document.location.search == "")
             url = "login.html?next=" + getRelativePath();
         else
@@ -993,13 +972,13 @@ function initEditPage() {
     $("#homeLink").attr('href', getBaseUrl());
     $("#newLink").attr('href', getBaseUrl() + "edit.html");
 
-    var queryParams = getQueryParams();
+    const queryParams = getQueryParams();
 
     if (queryParams.id) {
         $.getJSON("query.cgi?id=" + queryParams.id,
             function(tunes) {
                 if (tunes.length > 0) {
-                    var tune = tunes[0];
+                    const tune = tunes[0];
                     document.title = BASE_TITLE + " - Editing " + tune.name;
                     fillEdit(tune);
                     editId = tune.id;
@@ -1024,9 +1003,9 @@ window.initEditPage = initEditPage;
 function initLoginPage() {
     page = "login";
 
-    var queryParams = getQueryParams();
+    const queryParams = getQueryParams();
     if ('next' in queryParams) {
-        var next = queryParams['next'];
+        const next = queryParams['next'];
         delete queryParams['next'];
         $("#loginNextInput").val(next + buildQueryString(queryParams));
     }
@@ -1073,7 +1052,7 @@ function actionPrev() {
             randomPosition--;
             setCurrentObject(randomRows[randomPosition]);
         } else {
-            selectRandom(type='prev');
+            selectRandom('prev');
         }
     } else {
         selectPrevious();
@@ -1092,7 +1071,7 @@ function actionNext() {
             randomPosition++;
             setCurrentObject(randomRows[randomPosition]);
         } else {
-            selectRandom(type='next');
+            selectRandom('next');
         }
     } else {
         selectNext();
@@ -1164,7 +1143,7 @@ function actionSave() {
                 updateTunes([tune]);
                 infoMode();
                 if (currentObject == 'new' && mobile) {
-                    var newRow = findRow(tune.id);
+                    const newRow = findRow(tune.id);
                     if (newRow)
                         setCurrentObject(newRow);
                     else
@@ -1190,7 +1169,7 @@ function dialogOKClicked() {
     if (!selectedRow)
         return;
 
-    var deletedId = selectedRow.tune.id;
+    const deletedId = selectedRow.tune.id;
 
     $.ajax({
         url: "update.cgi",
@@ -1224,12 +1203,11 @@ function dialogCancelClicked() {
 window.dialogCancelClicked = dialogCancelClicked;
 
 function selectRandom(type) {
-    var rows = document.getElementById("tuneBody").childNodes;
-    var tuneRows = [];
+    const rows = document.getElementById("tuneBody").childNodes;
+    const tuneRows = [];
 
-    var i;
-    for (i = 0; i < rows.length; i++) {
-        var row = rows[i];
+    for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
         if (row.tune && !row.filtered)
             tuneRows.push(i);
     }
@@ -1238,8 +1216,8 @@ function selectRandom(type) {
         return;
 
 
-    var randIndex = Math.floor(Math.random() * tuneRows.length);
-    var randomRow = rows[tuneRows[randIndex]];
+    const randIndex = Math.floor(Math.random() * tuneRows.length);
+    const randomRow = rows[tuneRows[randIndex]];
 
     centerRow(randomRow);
 

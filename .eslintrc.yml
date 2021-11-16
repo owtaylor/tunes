@@ -5,6 +5,7 @@ extends: google
 globals:
     Atomics: readonly
     SharedArrayBuffer: readonly
+    "$": readonly
 parserOptions:
     ecmaVersion: 2018
 # plugins:
@@ -13,8 +14,6 @@ rules:
     curly: ["off"]
     indent: ["error", 4, { "outerIIFEBody": 0 }]
     max-len: ["error", 100]
-    no-var: ["off"]
+    no-undef: ["error"]
     quotes: ["off"]
     require-jsdoc: ["off"]
-
-
