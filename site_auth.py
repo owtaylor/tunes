@@ -29,7 +29,7 @@ def get_site_secret():
 def make_auth(username, t=None):
     if t is None:
         t = time.time()
-    message = "%s,%d" % (username, t)
+    message = f"{username},{int(t)}"
     hm = hmac.new(get_site_secret(), message.encode("UTF-8"), hashlib.sha256)
     return message + "," + password_utils.encode_256(hm.digest())
 

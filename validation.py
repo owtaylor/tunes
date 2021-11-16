@@ -29,37 +29,37 @@ RHYTHMS = set([
 
 def validate_id(v):
     if not re.match(r"\d+$", v):
-        raise ValidationError("Bad id '%s'" % v)
+        raise ValidationError(f"Bad id '{v}'")
 
 
 def validate_key(v):
     if not re.match(r"[ABCDEFG][b#]?(maj|min|mix|dor)$", v):
-        raise ValidationError("Bad key '%s'" % v)
+        raise ValidationError(f"Bad key '{v}'")
 
 
 def validate_rhythm(v):
     if v not in RHYTHMS:
-        raise ValidationError("Bad rhythm '%s'" % v)
+        raise ValidationError(f"Bad rhythm '{v}'")
 
 
 def validate_since(v):
     if not re.match(r"<?\d\d\d\d$", v):
-        raise ValidationError("Bad since '%s'" % v)
+        raise ValidationError(f"Bad since '{v}'")
 
 
 def validate_structure(v):
     if not re.match(r"[A-Z]+$", v):
-        raise ValidationError("Bad structure '%s'" % v)
+        raise ValidationError(f"Bad structure '{v}'")
 
 
 def validate_study(v):
     if v != '1' and v != '0':
-        raise ValidationError("Bad study '%s'" % v)
+        raise ValidationError(f"Bad study '{v}'")
 
 
 def validate_level(v):
     if not re.match(r"[12345]$", v):
-        raise ValidationError("Bad level '%s'" % v)
+        raise ValidationError(f"Bad level '{v}'")
 
 
 MANDATORY = ['key', 'level', 'name', 'rhythm']
@@ -84,7 +84,7 @@ VALIDATORS = {
 
 def validate_key_value(k, v):
     if k not in VALIDATORS:
-        raise ValidationError("Bad key '%s'" % k)
+        raise ValidationError(f"Bad key '{k}'")
 
     for validator in VALIDATORS[k]:
         validator(v)
@@ -93,7 +93,7 @@ def validate_key_value(k, v):
 def validate_mandatory(d):
     for k in MANDATORY:
         if k not in d:
-            raise ValidationError("Missing mandatory key '%s'" % k)
+            raise ValidationError(f"Missing mandatory key '{k}'")
 
 
 def validate_dict(d):

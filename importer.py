@@ -14,15 +14,13 @@ KEY_START = r"(?:$|(?:,\s*|\s+)(?:(?:ng|ts|(?:hn[a-z]+))\d+|[a-z]+:))"
 
 
 def compile_re(s):
-    return re.compile(s % {
-            'key_start': KEY_START
-            }, re.VERBOSE)
+    return re.compile(s.format(key_start=KEY_START), re.VERBOSE)
 
 
 TUNE_SPEC = compile_re(r"""
 ([*+~,x])\s+
 (.*?)
-(%(key_start)s.*)
+({key_start}.*)
 """)
 
 KEY_SPEC = compile_re(r"""
@@ -30,7 +28,7 @@ KEY_SPEC = compile_re(r"""
 (?:
 notes:\s*(.*?)\s*$
 |
-([a-z]+):\s*(.*?)\s*(?=%(key_start)s)
+([a-z]+):\s*(.*?)\s*(?={key_start})
 |
 ((?:ng|ts|hn(?:[a-z]+))\d+)\s*
 )
@@ -56,7 +54,7 @@ def iter_keys(s):
     while pos < len(s):
         m = KEY_SPEC.match(s, pos)
         if not m:
-            raise ParseError("Can't parse key at: %s" % (s[pos:],))
+            raise ParseError(f"Can't parse key at: {s[pos:]}")
         if m.group(1) is not None:
             k, v = ('notes', m.group(1))
         elif m.group(2) is not None:
@@ -78,7 +76,7 @@ def update_defaults(s, defaults):
 
 def validate_name(title):
     if re.search(r"\Waka", title, re.IGNORECASE):
-        raise ParseError("title '%s' contains aka" % (title,))
+        raise ParseError(f"title '{title}' contains aka")
 
 
 def parse_tune(s, defaults):
@@ -97,7 +95,7 @@ def parse_tune(s, defaults):
                 keys['refs'] = v
         else:
             if k in keys:
-                raise ValidationError("duplicate key '%s'", k)
+                raise ValidationError(f"duplicate key '{k}'")
             else:
                 keys[k] = v
 
@@ -123,14 +121,11 @@ def read_tunes_from_file(filename):
                 parse_tune(line, defaults)
             else:
                 raise ParseError("Unrecognized line")
-        # With Python-2.4/2.5, str(e) fails if e has a unicode message -
-        # it always tries to use the ascii codec. Work around it with e.args[0]
-        # (e.message isn't available in Python-2.4)
         except ParseError as e:
-            print("%s:%d: %s" % (filename, lineno, e.args[0]), file=sys.stderr)
+            print(f"{filename}:{lineno}: {e}", file=sys.stderr)
             have_error = True
         except ValidationError as e:
-            print("%s:%d: %s" % (filename, lineno, e.args[0]), file=sys.stderr)
+            print(f"{filename}:{lineno}: {e}", file=sys.stderr)
             have_error = True
     f.close()
 
