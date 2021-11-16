@@ -1,7 +1,9 @@
 FROM ubi8:latest
 
 RUN yum -y update && \
-    yum -y install httpd python39 python39-pyyaml sqlite
+    yum -y install httpd python39 python39-pip python39-pyyaml sqlite
+
+RUN pip-3.9 install flake8
 
 COPY tunes.conf /etc/httpd/conf.d/
 
