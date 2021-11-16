@@ -5,16 +5,16 @@ import http.cookies
 import os
 import sys
 
-import config
-import site_auth
+from tunes import config
+from tunes.site_auth import check_auth_cookie, set_auth_cookie, AuthError
 
 cookiedb = http.cookies.BaseCookie()
 if 'HTTP_COOKIE' in os.environ:
     cookiedb.load(os.environ['HTTP_COOKIE'])
 
 try:
-    username = site_auth.check_auth_cookie(cookiedb)
-except site_auth.AuthError:
+    username = check_auth_cookie(cookiedb)
+except AuthError:
     username = None
 
 form = cgi.FieldStorage()
@@ -24,12 +24,12 @@ password = form.getfirst("password", "").strip()
 
 try:
     if username == "":
-        raise site_auth.AuthError("Username not provided")
+        raise AuthError("Username not provided")
     if password == "":
-        raise site_auth.AuthError("Password not provided")
+        raise AuthError("Password not provided")
 
-    site_auth.set_auth_cookie(cookiedb, username, password)
-except site_auth.AuthError as e:
+    set_auth_cookie(cookiedb, username, password)
+except AuthError as e:
     print("Status: 403 Forbidden")
     print("Content-Type: text/html")
     print()

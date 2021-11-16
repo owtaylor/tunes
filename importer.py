@@ -1,11 +1,13 @@
 #!/usr/bin/python3
 
 import json
+import os
 import re
+import subprocess
 import sys
 
-from tunedb import TuneDB
-from validation import ValidationError, validate_key_value, validate_mandatory
+from tunes.tunedb import TuneDB
+from tunes.validation import ValidationError, validate_key_value, validate_mandatory
 
 have_error = False
 tunes = []

@@ -1,6 +1,7 @@
-import config
 import re
 import sqlite3 as sqlite
+
+from . import config
 
 
 class TuneDB:

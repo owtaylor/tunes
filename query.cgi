@@ -8,8 +8,8 @@ import re
 import sys
 import time
 
-import config
-from tunedb import TuneDB
+from tunes import config
+from tunes.tunedb import TuneDB
 
 
 def do_query(db, ref=None, tune_id=None):

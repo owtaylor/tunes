@@ -1,15 +1,14 @@
 #!/usr/bin/python3
 
-from tunedb import TuneDB
-
 import cgi
 import http.cookies
 import json
 import os
 import sys
 
-from validation import validate_dict, ValidationError
-import site_auth
+from tunes.tunedb import TuneDB
+from tunes.validation import validate_dict, ValidationError
+from tunes.site_auth import AuthError, check_auth_cookie
 
 STATUS_TEXTS = {
     400: "Bad Request",
@@ -30,8 +29,8 @@ if 'HTTP_COOKIE' in os.environ:
     cookiedb.load(os.environ['HTTP_COOKIE'])
 
 try:
-    username = site_auth.check_auth_cookie(cookiedb)
-except site_auth.AuthError:
+    username = check_auth_cookie(cookiedb)
+except AuthError:
     raise_error(403, "Not logged in")
 
 form = cgi.FieldStorage()

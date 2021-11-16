@@ -1,11 +1,13 @@
 #!/usr/bin/python3
 
-import config
 import hashlib
 import hmac
-import password_utils
 import re
 import time
+
+
+from . import password_utils
+from . import config
 
 
 class AuthError(Exception):
