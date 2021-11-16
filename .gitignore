@@ -1,5 +1,4 @@
 __pycache__
 *.bak
-data-*
 site.secret
 tunes.sqlite
