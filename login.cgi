@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import cgi
+import html
 import http.cookies
 import os
 import sys
@@ -36,7 +37,7 @@ except AuthError as e:
     print("<head><title>Owen Taylor's Tunebook</title></head>")
     print("<body>")
     print("<h1>Error logging in</h1>")
-    print("<p>%s</p>" % cgi.escape(str(e)))
+    print("<p>%s</p>" % html.escape(str(e)))
     print("</body>")
     sys.exit(1)
 
@@ -49,5 +50,5 @@ print(cookiedb.output())
 print()
 print("<head><title>Owen Taylor's Tunebook</title></head>")
 print("<body>")
-print("<p>Successfully logged in as %s</p>" % cgi.escape(username))
+print("<p>Successfully logged in as %s</p>" % html.escape(username))
 print("</body>")
