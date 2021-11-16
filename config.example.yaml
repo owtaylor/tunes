@@ -7,6 +7,6 @@ tunes_db: /srv/tunes-data/tunes.sqlite
 site_secret: QUFBQUFBQUFBQUFBQUFBQQ
 # The admin (and only user)
 admin_username: john.doe
-# Password for the admin user; see crypt_password script. Below is "password1".
+# Password for the admin user; see tools/crypt_password script. Below is "password1".
 # CHANGE THIS
 admin_password: 16384$8$1$Fil32HZVnzuBRqBp4FMkRA$7Y2ZV1NNO2PiSc8abnWASn5AgtjRKTIivWgnb6zg06A

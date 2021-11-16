@@ -2,7 +2,7 @@
 
 set +e -x
 
-flake8 *.py *.cgi
+flake8 tools/ *.cgi
 [ $? == 0 ] || failed="$failed flake8"
 
 set -e +x
