@@ -2,7 +2,7 @@ FROM ubi8:latest
 
 RUN yum -y module enable nodejs:16 && \
     yum -y update && \
-    yum -y install httpd npm python39 python39-pip python39-pyyaml sqlite
+    yum -y install git httpd npm python39 python39-pip python39-pyyaml sqlite
 
 RUN pip-3.9 install flake8
 
@@ -24,9 +24,16 @@ RUN npm install
 
 ADD tools /srv/tunes/tools
 ADD tunes /srv/tunes/tunes
-ADD README.md config.example.yaml example.data .eslintrc.yml .flake8 tsconfig.json tunes.js *.cgi *.html *.css /srv/tunes
+ADD \
+    README.md \
+    config.example.yaml example.data \
+    .eslintrc.yml .flake8 rollup.config.js tsconfig.json \
+    dependencies.js tunes.js \
+    *.cgi *.html *.css \
+    /srv/tunes
 
-RUN mkdir /srv/tunes-data && \
+RUN ./node_modules/.bin/rollup -c && \
+    mkdir /srv/tunes-data && \
     cp config.example.yaml /srv/tunes-data/config.yaml && \
     sqlite3 /srv/tunes-data/tunes.sqlite < example.data && \
     chown -R apache:apache /srv/tunes-data/

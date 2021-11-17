@@ -8,8 +8,7 @@ globals:
     "$": readonly
 parserOptions:
     ecmaVersion: 2018
-# plugins:
-#    - vue
+    sourceType: module
 rules:
     comma-dangle: ["error", {
         "arrays": "always-multiline",

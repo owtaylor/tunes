@@ -13,6 +13,8 @@ done
 
 live_args=()
 if $live ; then
+    # Build a local dependencies_bundle.json
+    node_modules/.bin/rollup -c
     live_args=(-v "$(pwd):/srv/tunes:z")
 fi
 

@@ -1,6 +1,5 @@
-/* -*- mode: js2; js2-basic-offset: 4; indent-tabs-mode: nil -*- */
+import {$} from "./dependencies.js";
 
-(function() {
 const COLUMN_COUNT = 5;
 const MOBILE_COLUMN_COUNT = 3;
 const BASE_TITLE = "Owen Taylor's Tunebook";
@@ -220,7 +219,7 @@ function refresh() {
     window.open(document.location.href, "_self");
 }
 
-class IndexPage {
+export class IndexPage {
     constructor() {
         this.mobile = false;
 
@@ -1106,10 +1105,8 @@ class IndexPage {
         }
     }
 }
-// @ts-ignore
-window.IndexPage = IndexPage;
 
-class EditPage {
+export class EditPage {
     constructor() {
         this.editId = null;
     }
@@ -1289,10 +1286,8 @@ class EditPage {
         });
     }
 }
-// @ts-ignore
-window.EditPage = EditPage;
 
-class LoginPage {
+export class LoginPage {
     init() {
         const queryParams = getQueryParams();
         if ('next' in queryParams) {
@@ -1302,6 +1297,3 @@ class LoginPage {
         }
     }
 }
-// @ts-ignore
-window.LoginPage = LoginPage;
-})();

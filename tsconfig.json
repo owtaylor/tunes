@@ -3,6 +3,7 @@
         "allowJs": true,
         "checkJs": true,
         "downlevelIteration": true,
+        "esModuleInterop": true,
         "lib": [
             "ES2017", "DOM", "DOM.Iterable"
         ],

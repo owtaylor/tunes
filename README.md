@@ -10,7 +10,10 @@ The latest container can also be found at https://quay.io/repository/owtaylor/tu
 
 Development
 ===========
-`tools/run-container.sh --live` runs the container so that live edits to the source code work.
+* `npm install` to install dependencies and tools locally.
+* `tools/test.sh` to run tests locally
+* `tools/test-container.sh` to run tests inside the container.
+* `tools/run-container.sh --live` runs the container so that live edits to the source code work.
 
 License
 =======

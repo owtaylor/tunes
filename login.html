@@ -2,10 +2,11 @@
   <head>
     <title>Owen Taylor's Tunebook</title>
     <link rel="stylesheet" href="tunes.css" type="text/css"></link>
-    <script src="jquery.min.js" type="text/javascript"></script>
-    <script src="tunes.js" type="text/javascript"></script>
-    <script type="text/javascript">
-      $(function() { const page = LoginPage(); page.init(); });
+    <script type="module">
+      import { LoginPage } from "/tunes.js";
+
+      const page = new LoginPage();
+      page.init();
     </script>
   </head>
   <body id="loginPage">
