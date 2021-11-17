@@ -24,7 +24,7 @@ RUN npm install
 
 ADD tools /srv/tunes/tools
 ADD tunes /srv/tunes/tunes
-ADD README.md config.example.yaml example.data .eslintrc.yml .flake8 *.cgi *.html *.js *.css /srv/tunes
+ADD README.md config.example.yaml example.data .eslintrc.yml .flake8 tsconfig.json tunes.js *.cgi *.html *.css /srv/tunes
 
 RUN mkdir /srv/tunes-data && \
     cp config.example.yaml /srv/tunes-data/config.yaml && \

@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "allowJs": true,
+        "checkJs": true,
+        "downlevelIteration": true,
+        "lib": [
+            "ES2017", "DOM", "DOM.Iterable"
+        ],
+        "noEmit": true
+    },
+    "files": [
+        "tunes.js"
+    ]
+}

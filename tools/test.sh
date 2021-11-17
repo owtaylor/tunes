@@ -6,6 +6,8 @@ flake8 tunes ./*.cgi
 [ $? == 0 ] || failed="$failed flake8"
 node_modules/.bin/eslint tunes.js
 [ $? == 0 ] || failed="$failed eslint"
+node_modules/.bin/tsc
+[ $? == 0 ] || failed="$failed typescriptCheckJs"
 
 set -e +x
 

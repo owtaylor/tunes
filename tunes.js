@@ -224,7 +224,8 @@ class IndexPage {
     constructor() {
         this.mobile = false;
 
-        this.allTunes = null;
+        this.tunesById = {};
+        this.allTunes = [];
         this.currentObject = null;
 
         this.randomPosition = -1;
@@ -232,6 +233,7 @@ class IndexPage {
 
         this.upIsBack = false;
         this.dialogUp = false;
+        /** @type {HTMLElement} */
         this.selectedRow = null;
 
         this.filterText = null;
@@ -260,7 +262,7 @@ class IndexPage {
     }
 
     getTuneRows() {
-        return document.querySelectorAll("#tuneBody > tr");
+        return /** @type {NodeListOf<HTMLElement>} */(document.querySelectorAll("#tuneBody > tr"));
     }
 
     refilter() {
@@ -279,24 +281,26 @@ class IndexPage {
         const rows = this.getTuneRows();
         let lastheader = null;
         for (const row of rows) {
+            const tuneId = row.dataset.tuneId;
 
-            if (row.tune == null) {
+            if (tuneId == null) {
                 // A header
                 if (lastheader)
                     $(lastheader).hide();
                 lastheader = row;
             } else {
-                if (filterFunction(row.tune)) {
+                const tune = this.tunesById[tuneId];
+                if (filterFunction(tune)) {
                     // A visible tune
                     if (lastheader) {
                         $(lastheader).show();
                         lastheader = null;
                     }
 
-                    row.filtered = false;
+                    row.dataset.filtered = "";
                     $(row).show();
                 } else {
-                    row.filtered = true;
+                    row.dataset.filtered = "true";
                     $(row).hide();
                 }
             }
@@ -307,11 +311,9 @@ class IndexPage {
     }
 
     findRow(tuneId) {
-        const tuneIdInt = parseInt(tuneId);
-
         const rows = this.getTuneRows();
         for (const row of rows) {
-            if (row.tune && row.tune.id == tuneIdInt)
+            if (row.dataset.tuneId == tuneId + "")
                 return row;
         }
 
@@ -407,7 +409,8 @@ class IndexPage {
             return;
         }
 
-        const id = (obj == 'new') ? 'new' : obj.tune.id;
+        const id = (obj == 'new') ? 'new' : obj.dataset.tuneId;
+        const tune = id == 'new' ? null : this.tunesById[id];
 
         if (hadObject) {
             if (changeHistory)
@@ -429,14 +432,14 @@ class IndexPage {
         }
 
         if (this.mobile) {
-            const name = (obj == 'new') ? 'New' : obj.tune.name;
+            const name = (obj == 'new') ? 'New' : tune.name;
             document.title = name + " - Owen Taylor's Tunebook";
         }
 
         if (this.selectedRow) {
             if (!this.mobile)
                 $(this.selectedRow).addClass("selected-row");
-            this.fillInfo(this.selectedRow.tune);
+            this.fillInfo(tune);
         }
     }
 
@@ -499,7 +502,7 @@ class IndexPage {
     createTuneRow(tune) {
         const tr = document.createElement("tr");
         // Backreference for future use
-        tr.tune = tune;
+        tr.dataset.tuneId = tune.id;
 
         {
             const td = document.createElement("td");
@@ -601,10 +604,10 @@ class IndexPage {
                 oldRow = null;
 
             // See if we have any stale headers to remove
-            if (oldRow && oldRow.tune == null) {
-                if (oldRow.rhythm < tune.rhythm ||
-                    (oldRow.rhythm == tune.rhythm &&
-                    oldRow.key < tune.key)) {
+            if (oldRow && oldRow.dataset.tuneId == null) {
+                if (oldRow.dataset.rhythm < tune.rhythm ||
+                    (oldRow.dataset.rhythm == tune.rhythm &&
+                     oldRow.dataset.key < tune.key)) {
                     $(oldRow).remove();
                     oldIndex++;
                     if (oldIndex < oldRows.length)
@@ -617,9 +620,9 @@ class IndexPage {
             if (tune.rhythm != rhythm || tune.key != key) {
                 // Need a header
 
-                if (oldRow && oldRow.tune == null &&
-                    oldRow.rhythm == tune.rhythm &&
-                    oldRow.key == tune.key) {
+                if (oldRow && oldRow.dataset.tuneId == null &&
+                    oldRow.dataset.rhythm == tune.rhythm &&
+                    oldRow.dataset.key == tune.key) {
                     // Already have the right header in the right place,
                     // may have to adjust its class
                     tr = oldRow;
@@ -638,8 +641,8 @@ class IndexPage {
                     );
                     th.colSpan = this.mobile ? MOBILE_COLUMN_COUNT : COLUMN_COUNT;
                     tr.appendChild(th);
-                    tr.rhythm = rhythm;
-                    tr.key = key;
+                    tr.dataset.rhythm = rhythm;
+                    tr.dataset.key = key;
 
                     if (oldRow) {
                         $(oldRow).before(tr);
@@ -659,7 +662,7 @@ class IndexPage {
                 key = tune.key;
             }
 
-            if (oldRow && oldRow.tune && oldRow.tune.id == tune.id) {
+            if (oldRow && oldRow.dataset.tuneId == tune.id) {
                 // Already have this tune, skip it
                 oldIndex++;
                 if (oldIndex < oldRows.length)
@@ -675,7 +678,7 @@ class IndexPage {
                     tuneBody.appendChild(tr);
                 }
 
-                if (this.selectedRow && this.selectedRow.tune.id == tune.id) {
+                if (this.selectedRow && this.selectedRow.dataset.tuneId == tune.id) {
                     this.setCurrentObject(tr);
                 }
             }
@@ -706,6 +709,7 @@ class IndexPage {
             const tune = this.allTunes[i];
             if (tune.id in newTunes) {
                 this.allTunes[i] = newTunes[tune.id];
+                this.tunesById[tune.id] = newTunes[tune.id];
                 delete newTunes[tune.id];
                 replacedTunes[tune.id] = 1;
             }
@@ -729,6 +733,7 @@ class IndexPage {
     deleteTunes(ids) {
         const deletedMap = {};
         for (const id of ids) {
+            delete this.tunesById[id];
             deletedMap[id] = 1;
         }
 
@@ -767,13 +772,13 @@ class IndexPage {
         if (!this.selectedRow)
             return false;
 
-        let node = this.selectedRow.nextSibling;
+        let node = /** @type {HTMLElement} */(this.selectedRow.nextSibling);
         while (node) {
-            if (node.tune != null && !node.filtered) {
+            if (node.dataset.tuneId != null && !node.dataset.filtered) {
                 this.setCurrentObject(node);
                 return true;
             }
-            node = node.nextSibling;
+            node = /** @type {HTMLElement} */(node.nextSibling);
         }
 
         return false;
@@ -783,13 +788,13 @@ class IndexPage {
         if (!this.selectedRow)
             return false;
 
-        let node = this.selectedRow.previousSibling;
+        let node = /** @type {HTMLElement} */(this.selectedRow.previousSibling);
         while (node) {
-            if (node.tune != null && !node.filtered) {
+            if (node.dataset.tuneId != null && !node.dataset.filtered) {
                 this.setCurrentObject(node);
                 return true;
             }
-            node = node.previousSibling;
+            node = /** @type {HTMLElement} */(node.previousSibling);
         }
 
         return false;
@@ -822,7 +827,9 @@ class IndexPage {
 
                     if (this.mobile) {
                         // Get the right state set in the history
-                        history.replaceState(row.tune.id, null, '?tune=' + row.tune.id);
+                        history.replaceState(
+                            row.dataset.tuneId, null, '?tune=' + row.dataset.tuneId
+                        );
                     }
                 }
             }
@@ -832,7 +839,7 @@ class IndexPage {
     init() {
         const mediaTypeDiv = document.getElementById("mediaTypeDiv");
         if (window.getComputedStyle(mediaTypeDiv).fontWeight == 'bold' ||
-            window.getComputedStyle(mediaTypeDiv).fontWeight == 700) {
+            window.getComputedStyle(mediaTypeDiv).fontWeight == "700") {
             this.mobile = true;
             $("#sideDiv").hide();
             $("#tuneRefsCol").remove();
@@ -843,14 +850,12 @@ class IndexPage {
 
         $.getJSON("query.cgi",
             (data) => {
-                data.sort(compareTunes);
-                this.allTunes = data;
-                this.updateTuneElements();
-                this.filterChanged();
+                this.updateTunes(data);
                 this.selectInitial();
             });
 
         this.createRhythmOptions();
+        this.filterChanged();
 
         $("#editAction").click(() => this.actionEdit());
         $("#deleteAction").click(() => this.actionDelete());
@@ -987,7 +992,8 @@ class IndexPage {
         if (!this.selectedRow)
             return;
 
-        this.editPage.fillEdit(this.selectedRow.tune);
+        const tune = this.tunesById[this.selectedRow.dataset.tuneId];
+        this.editPage.fillEdit(tune);
         this.inEdit = true;
         this.editMode();
     }
@@ -1018,8 +1024,9 @@ class IndexPage {
         if (!this.selectedRow)
             return;
 
+        const tune = this.tunesById[this.selectedRow.dataset.tuneId];
         $("#dialogMessageDiv").text(
-            "Really delete \u201c" + this.selectedRow.tune.name + "\u201d?"
+            "Really delete \u201c" + tune.name + "\u201d?"
         );
         $("#dialogDiv").show();
         $("#dialogCancelButton").focus();
@@ -1037,7 +1044,7 @@ class IndexPage {
         if (!this.selectedRow)
             return;
 
-        const deletedId = this.selectedRow.tune.id;
+        const deletedId = this.selectedRow.dataset.tuneId;
 
         $.ajax({
             url: "update.cgi",
@@ -1099,6 +1106,7 @@ class IndexPage {
         }
     }
 }
+// @ts-ignore
 window.IndexPage = IndexPage;
 
 class EditPage {
@@ -1194,13 +1202,13 @@ class EditPage {
     addLevelListeners() {
         document.querySelectorAll(".level-select").forEach((item) => {
             item.addEventListener("click", (event) => {
-                this.selectLevel(parseInt(item.dataset.level));
+                this.selectLevel(parseInt(/** @type {HTMLElement} */(item).dataset.level));
             });
         });
 
         document.querySelectorAll(".max-level-select").forEach((item) => {
             item.addEventListener("click", (event) => {
-                this.selectMaxlevel(parseInt(item.dataset.level));
+                this.selectMaxlevel(parseInt(/** @type {HTMLElement} */(item).dataset.level));
             });
         });
     }
@@ -1281,6 +1289,7 @@ class EditPage {
         });
     }
 }
+// @ts-ignore
 window.EditPage = EditPage;
 
 class LoginPage {
@@ -1293,5 +1302,6 @@ class LoginPage {
         }
     }
 }
+// @ts-ignore
 window.LoginPage = LoginPage;
 })();
