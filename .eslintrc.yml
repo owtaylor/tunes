@@ -11,6 +11,11 @@ parserOptions:
 # plugins:
 #    - vue
 rules:
+    comma-dangle: ["error", {
+        "arrays": "always-multiline",
+        "objects": "always-multiline",
+        "functions": "never",
+    }]
     curly: ["off"]
     indent: ["error", 4, { "outerIIFEBody": 0 }]
     max-len: ["error", 100]

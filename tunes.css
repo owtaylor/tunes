@@ -360,7 +360,7 @@ a:hover {
     padding-right: 1em;
 }
 
-.level-select {
+.level-select, .max-level-select {
     display: inline-block;
     width: 1em;
     height: 1em;
@@ -370,7 +370,7 @@ a:hover {
     color: black;
 }
 
-.level-select:hover {
+.level-select:hover, .max-level-select {
     text-decoration: none;
 }
 
