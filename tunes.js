@@ -4,6 +4,24 @@ const COLUMN_COUNT = 5;
 const MOBILE_COLUMN_COUNT = 3;
 const BASE_TITLE = "Owen Taylor's Tunebook";
 
+/**
+ * @typedef {Object} Tune
+ * @property {number | null} id
+ * @property {string} name
+ * @property {string} aka
+ * @property {string} composer
+ * @property {string} key
+ * @property {string} rhythm
+ * @property {string} refs
+ * @property {string} notes
+ * @property {number} level
+ * @property {number} maxlevel
+ * @property {string} since
+ * @property {string} incipit
+ * @property {number} study
+ * @property {string} structure
+ */
+
 class Rhythm {
     /**
      * @param {string} id
@@ -71,6 +89,11 @@ function _makeLevelSymbol(level, maxlevel) {
     return span;
 }
 
+/**
+ * @param {Tune} a
+ * @param {Tune} b
+ * @return {number}
+ */
 function compareTunes(a, b) {
     if (a.rhythm < b.rhythm)
         return -1;
@@ -222,7 +245,9 @@ export class IndexPage {
     constructor() {
         this.mobile = false;
 
+        /** @type {Object.<string, Tune>} */
         this.tunesById = {};
+        /** @type {Array<Tune>} */
         this.allTunes = [];
         this.currentObject = null;
 
@@ -265,6 +290,10 @@ export class IndexPage {
 
     refilter() {
         const filterRegexp = new RegExp(this.filterText, 'i');
+        /**
+         * @param {Tune} tune
+         * @return {boolean}
+         */
         const filterFunction = (tune) => {
             if (this.studyOnly && tune.study != 1)
                 return false;
@@ -441,6 +470,7 @@ export class IndexPage {
         }
     }
 
+    /** @param {Tune} tune */
     fillInfo(tune) {
         const infoDiv = $("#infoDiv");
         infoDiv.empty();
@@ -513,10 +543,14 @@ export class IndexPage {
         }
     }
 
+    /**
+     * @param {Tune} tune
+     * @return {HTMLElement}
+     */
     createTuneRow(tune) {
         const tr = document.createElement("tr");
         // Backreference for future use
-        tr.dataset.tuneId = tune.id;
+        tr.dataset.tuneId = tune.id + "";
 
         {
             const td = document.createElement("td");
@@ -678,7 +712,7 @@ export class IndexPage {
                 key = tune.key;
             }
 
-            if (oldRow && oldRow.dataset.tuneId == tune.id) {
+            if (oldRow && oldRow.dataset.tuneId == tune.id + "") {
                 // Already have this tune, skip it
                 oldIndex++;
                 if (oldIndex < oldRows.length)
@@ -694,7 +728,7 @@ export class IndexPage {
                     tuneBody.appendChild(tr);
                 }
 
-                if (this.selectedRow && this.selectedRow.dataset.tuneId == tune.id) {
+                if (this.selectedRow && this.selectedRow.dataset.tuneId == tune.id + "") {
                     this.setCurrentObject(tr);
                 }
             }
@@ -714,6 +748,7 @@ export class IndexPage {
         }
     }
 
+    /** @param {Array<Tune>} tunes */
     updateTunes(tunes) {
         const newTunes = {};
         const replacedTunes = {};
@@ -746,6 +781,7 @@ export class IndexPage {
         this.refilter();
     }
 
+    /** @param {Array<number>} ids */
     deleteTunes(ids) {
         const deletedMap = {};
         for (const id of ids) {
@@ -1157,7 +1193,11 @@ export class EditPage {
         throw new Error("No selected maxlevel");
     }
 
+    /** @param {Object} [tune] */
     fillEdit(tune) {
+        if (tune == null) {
+            tune = {};
+        }
         this.editId = tune.id;
 
         $("#editName").val(tune.name != null ? tune.name : "");
@@ -1174,26 +1214,37 @@ export class EditPage {
         this.selectMaxlevel(tune.maxlevel != null ? tune.maxlevel : level);
         $("#editNotes").val(tune.notes != null ? tune.notes : "");
         if (tune.study)
-            $("#editStudy").attr("checked", "checked");
+            $("#editStudy").prop("checked", true);
         else
-            $("#editStudy").removeAttr("checked");
+            $("#editStudy").prop("checked", false);
     }
 
+    /** @return {Tune} */
     fetchEditData() {
+        const stringVal = (id) => {
+            const el = /** @type {HTMLInputElement} */(document.getElementById(id));
+            return /** string */(el.value);
+        };
+        const checkVal = (id) => {
+            const el = /** @type {HTMLInputElement} */(document.getElementById(id));
+            return el.checked;
+        };
+
         const result = {
-            name: $("#editName").val(),
-            aka: $("#editAka").val(),
-            rhythm: $("#editRhythm").val(),
-            key: $("#editKey").val(),
-            structure: $("#editStructure").val(),
-            composer: $("#editComposer").val(),
-            refs: $("#editRefs").val(),
-            incipit: $("#editIncipit").val(),
-            since: $("#editSince").val(),
+            id: null,
+            name: stringVal("editName"),
+            aka: stringVal("editAka"),
+            rhythm: stringVal("editRhythm"),
+            key: stringVal("editKey"),
+            structure: stringVal("editStructure"),
+            composer: stringVal("editComposer"),
+            refs: stringVal("editRefs"),
+            incipit: stringVal("editIncipit"),
+            since: stringVal("editSince"),
             level: this.getLevel(),
             maxlevel: this.getMaxlevel(),
-            notes: $("#editNotes").val(),
-            study: $("#editStudy").attr("checked") ? '1' : '0',
+            notes: stringVal("editNotes"),
+            study: checkVal("editStudy") ? 1 : 0,
         };
 
         if (this.editId != null) {
