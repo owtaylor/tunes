@@ -1,50 +1,49 @@
-import {$} from "./dependencies.js";
+import {$, renderAbc} from "./dependencies.js";
 
 const COLUMN_COUNT = 5;
 const MOBILE_COLUMN_COUNT = 3;
 const BASE_TITLE = "Owen Taylor's Tunebook";
 
-const RHYTHMS = {
-    'air': "Airs",
-    'barn dance': "Barn Dances",
-    'fling': "Flings",
-    'highland': "Highlands",
-    'hornpipe': "Hornpipes",
-    'jig': "Jigs",
-    'march': "Marches",
-    'mazurka': "Mazurkas",
-    'piece': "Pieces",
-    'polka': "Polkas",
-    'reel': "Reels",
-    'schottische': "Schottisches",
-    'set dance': "Set Dances",
-    'slide': "Slides",
-    'slip jig': "Slip Jigs",
-    'strathspey': "Strathspeys",
-    'waltz': "Waltzes",
-};
-
-function foreachRhythm(callback) {
-    const rhythms = [];
-
-    for (const rhythm of Object.keys(RHYTHMS))
-        rhythms.push(rhythm);
-    rhythms.sort();
-
-    for (const rhythm of rhythms) {
-        let rhythmName;
-        if (rhythm == 'march')
-            rhythmName = "March";
-        else if (rhythm == 'waltz')
-            rhythmName = "Waltz";
-        else
-            rhythmName = RHYTHMS[rhythm].slice(0, -1);
-
-        callback(rhythm, rhythmName, RHYTHMS[rhythm]);
+class Rhythm {
+    /**
+     * @param {string} id
+     * @param {string} meter
+     * @param {string} namePlural
+     */
+    constructor(id, meter, namePlural=null) {
+        this.id = id;
+        this.meter = meter;
+        this.name = id.replace(/(?<=^| )./g, (x) => x.toUpperCase());
+        if (namePlural) {
+            this.namePlural = namePlural;
+        } else {
+            this.namePlural = this.name + "s";
+        }
     }
 }
 
+const RHYTHMS = new Map([
+    new Rhythm("air", "-"),
+    new Rhythm("barn_dance", "4/4"),
+    new Rhythm("fling", "4/4"),
+    new Rhythm("highland", "4/4"),
+    new Rhythm("hornpipe", "4/4"),
+    new Rhythm("jig", "6/8"),
+    new Rhythm("march", "4/4", "Marches"),
+    new Rhythm("mazurka", "4/4"),
+    new Rhythm("piece", "-"),
+    new Rhythm("polka", "2/4"),
+    new Rhythm("reel", "4/4"),
+    new Rhythm("schottische", "4/4"),
+    new Rhythm("set dance", "4/4"),
+    new Rhythm("slide", "12/8"),
+    new Rhythm("slip jig", "9/8"),
+    new Rhythm("strathspey", "4/4"),
+    new Rhythm("waltz", "3/4"),
+].map((r) => [r.id, r]));
+
 function _make(element, cls, text) {
+    /** @type {HTMLElement} */
     const div = document.createElement(element);
     if (text != null)
         div.appendChild(document.createTextNode(text));
@@ -459,7 +458,7 @@ export class IndexPage {
             }
         }
 
-        let details = RHYTHMS[tune.rhythm].slice(0, -1) + " - " + tune.key;
+        let details = RHYTHMS.get(tune.rhythm).name + " - " + tune.key;
         if (tune.structure)
             details += " - " + tune.structure;
         infoDiv.append(_make("div", "info-details", details));
@@ -480,8 +479,24 @@ export class IndexPage {
         if (tune.incipit != null) {
             const incipitDiv = _make("div", "info-incipit");
             incipitDiv.appendChild(_make("span", "info-label", "Starts: "));
-            incipitDiv.appendChild(_make("span", "info-value", tune.incipit));
+            const incipitMusic = _make("div", "info-music");
+            incipitMusic.setAttribute("id", "infoIncipitMusic");
+            const abc =
+                "M: " + RHYTHMS.get(tune.rhythm).meter + "\n" +
+                "L: 1/8\n" +
+                "K: " + tune.key + "\n" +
+                tune.incipit;
+            incipitDiv.appendChild(incipitMusic);
             infoDiv.append(incipitDiv);
+            renderAbc("infoIncipitMusic", abc, {
+                responsive: "resize",
+                staffwidth: incipitMusic.clientWidth,
+                wrap: {
+                    minSpacing: 1,
+                    maxSpacing: 2.7,
+                    preferredMeasuresPerLine: 2,
+                },
+            });
         }
 
         if (tune.since != null) {
@@ -636,7 +651,9 @@ export class IndexPage {
 
                     const th = document.createElement("th");
                     th.appendChild(
-                        document.createTextNode(RHYTHMS[tune.rhythm] + " - " + tune.key)
+                        document.createTextNode(
+                            RHYTHMS.get(tune.rhythm).namePlural + " - " + tune.key
+                        )
                     );
                     th.colSpan = this.mobile ? MOBILE_COLUMN_COUNT : COLUMN_COUNT;
                     tr.appendChild(th);
@@ -755,14 +772,15 @@ export class IndexPage {
     createRhythmOptions() {
         const filterRhythm = document.getElementById("filterRhythm");
 
-        const addOption = (rhythm, rythmName, rhythmNamePlural) => {
-            const option = _make("option", null, rhythmNamePlural);
-            option.value = rhythm;
+        const addOption = (id, namePlural) => {
+            const option =
+                /** @type {HTMLOptionElement} */(_make("option", null, namePlural));
+            option.value = id;
             filterRhythm.appendChild(option);
         };
 
-        addOption("all", null, "All");
-        foreachRhythm(addOption);
+        addOption("all", "All");
+        RHYTHMS.forEach((rhythm) => addOption(rhythm.id, rhythm.namePlural));
 
         this.editPage.createRhythmOptions();
     }
@@ -1189,9 +1207,11 @@ export class EditPage {
     // having to maintain the rhythm list in the HTML as well
     createRhythmOptions() {
         const editRhythm = document.getElementById("editRhythm");
-        foreachRhythm((rhythm, rhythmName, rhythmNamePlural) => {
-            const option = _make("option", null, rhythmName);
-            option.value = rhythm;
+        RHYTHMS.forEach((rhythm) => {
+            const option =
+            /** @type {HTMLOptionElement} */(_make("option", null, rhythm.name));
+
+            option.value = rhythm.id;
             editRhythm.appendChild(option);
         });
     }

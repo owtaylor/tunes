@@ -7,5 +7,6 @@
 // or run nodule_modules/.bin/rollup -c
 
 import $ from "jquery";
+import {renderAbc} from "abcjs";
 
-export {$};
+export {$, renderAbc};

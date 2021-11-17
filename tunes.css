@@ -471,3 +471,11 @@ a:hover {
     text-align: right;
     padding-top: 0.5em;
 }
+
+#infoIncipitMusic {
+    width: 100%;
+}
+
+#infoIncipitMusic > svg {
+    width: 100%;
+}
