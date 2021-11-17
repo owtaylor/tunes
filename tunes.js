@@ -691,8 +691,8 @@ export class IndexPage {
                     );
                     th.colSpan = this.mobile ? MOBILE_COLUMN_COUNT : COLUMN_COUNT;
                     tr.appendChild(th);
-                    tr.dataset.rhythm = rhythm;
-                    tr.dataset.key = key;
+                    tr.dataset.rhythm = tune.rhythm;
+                    tr.dataset.key = tune.key;
 
                     if (oldRow) {
                         $(oldRow).before(tr);
