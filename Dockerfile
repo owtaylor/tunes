@@ -12,7 +12,9 @@ RUN rm /etc/httpd/conf.d/welcome.conf
 RUN sed -i \
     -e "s|^ErrorLog .*|ErrorLog /dev/stderr|" \
     -e "s|^ *CustomLog .*|CustomLog /dev/stdout combined|" \
-    /etc/httpd/conf/httpd.conf
+    -e "s|^\(Listen .*\)|# \1|" \
+    /etc/httpd/conf/httpd.conf && \
+    chown -R apache:apache /var/run/httpd
 
 ENV TUNES_CONFIG=/srv/tunes-data/config.yaml
 
