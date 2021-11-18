@@ -14,7 +14,12 @@ RUN sed -i \
     -e "s|^ *CustomLog .*|CustomLog /dev/stdout combined|" \
     -e "s|^\(Listen .*\)|# \1|" \
     /etc/httpd/conf/httpd.conf && \
-    chown -R apache:apache /var/run/httpd
+    mkdir /srv/tunes-data && \
+    for dir in run state ; do \
+        mkdir -p /srv/tunes-data/$dir && \
+        ln -sfT /srv/tunes-data/$dir /etc/httpd/$dir ; \
+    done && \
+    chown -R apache:apache /srv/tunes-data
 
 ENV TUNES_CONFIG=/srv/tunes-data/config.yaml
 
@@ -35,9 +40,8 @@ ADD \
     /srv/tunes
 
 RUN ./node_modules/.bin/rollup -c && \
-    mkdir /srv/tunes-data && \
     cp config.example.yaml /srv/tunes-data/config.yaml && \
     sqlite3 /srv/tunes-data/tunes.sqlite < example.data && \
-    chown -R apache:apache /srv/tunes-data/
+    chown -R apache:apache /srv/tunes-data
 
 CMD httpd -D FOREGROUND
